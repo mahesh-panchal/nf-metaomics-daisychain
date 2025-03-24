@@ -10,3 +10,4 @@ nxf-*/
 
 # pixi environments
 .pixi
+*.egg-info
