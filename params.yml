@@ -1,22 +1,22 @@
 # Run pipelines
 fetchngs_enabled: true
-detaxizer_enabled: true
-createtaxdb_enabled: true
-ampliseq_enabled: true
-taxprofiler_enabled: true
-eager_enabled: true
-magmap_enabled: true
-mag_enabled: true
-metatdenovo_enabled: true
-differentialabundance_enabled: true
-metapep_enabled: true
-phageannotator_enabled: true
-funcscan_enabled: true
-phyloplace_enabled: true
+detaxizer_enabled: false
+createtaxdb_enabled: false
+ampliseq_enabled: false
+taxprofiler_enabled: false
+eager_enabled: false
+magmap_enabled: false
+mag_enabled: false
+metatdenovo_enabled: false
+differentialabundance_enabled: false
+metapep_enabled: false
+phageannotator_enabled: false
+funcscan_enabled: false
+phyloplace_enabled: false
 
 ## Pipeline inputs
 ### Use nf-core launch
-fetchngs_params: 'tests/data/fetchngs_taxprofiler_samplesheet.csv'
+fetchngs_params: 'tests/params/fetchngs-params.json'
 detaxizer_params: 'tests/data/detaxizer_samplesheet.csv'
 createtaxdb_params: 'tests/data/createtaxdb_samplesheet.csv'
 ampliseq_params: 'tests/data/ampliseq_samplesheet.csv'
@@ -33,7 +33,7 @@ phyloplace_params: 'tests/data/phyloplace_samplesheet.csv'
 
 ## Command-line options
 all_cli: '-resume -ansi-log false -profile docker'
-fetchngs_cli: ''
+fetchngs_cli: '-r 1.12.0'
 detaxizer_cli: ''
 createtaxdb_cli: ''
 ampliseq_cli: ''
