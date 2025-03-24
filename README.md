@@ -5,13 +5,13 @@
 A Nextflow meta-pipeline for meta-omic data.
 
 > [!TIP]
-> Use `nf-core launch` to write the pipeline `params.yml` which can
+> Use `nf-core pipelines launch <pipeline>` to write the pipeline `params.yml` which can
 > supplied as a workflow parameter : `<workflow>.params_file`.
 
 ## Usage
 
 Parameters are supplied to child workflows through `params.yml` files. These
-files can be generated with `nf-core launch` and supplied to the workflow.
+files can be generated with `nf-core pipelines launch <pipeline>` and supplied to the workflow.
 
 ```bash
 nextflow run main.nf -params-file params.yml
@@ -23,3 +23,5 @@ nextflow run main.nf -params-file params.yml
 > a previous workflow (`<workflow>.input` and previous workflow stages take precedence over
 > samplesheets provided through `<workflow>.params_file`).
 
+> [!WARNING]
+> Please use absolute paths for all input files.
