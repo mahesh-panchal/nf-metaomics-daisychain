@@ -12,81 +12,119 @@ include { NEXTFLOW_RUN as NFCORE_METAPEP               } from "$projectDir/modul
 include { NEXTFLOW_RUN as NFCORE_PHAGEANNOTATOR        } from "$projectDir/modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_FUNCSCAN              } from "$projectDir/modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_PHYLOPLACE            } from "$projectDir/modules/local/nextflow/run/main"
-include { readWithDefault                              } from "$projectDir/functions/local/utils"
-include { resolveFileFromDir as getSamplesheet         } from "$projectDir/functions/local/utils"
-include { createMagSamplesheet                         } from "$projectDir/functions/local/utils"
-include { createFuncscanSamplesheet                    } from "$projectDir/functions/local/utils"
 
 workflow {
-    // Initialise undefined channels
-    def fetchngs_output_samplesheet = null
-    def fetchngs_output             = null
-    def mag_output                  = null
+    // TODO: Check params-file for values that override channel inputs
 
-    // Run pipelines
-    if ( 'demo' in wf_chain ) {
-        NFCORE_DEMO (
-            'nf-core/demo',
-            [
-                params.general.wf_opts?: '',
-                params.demo.wf_opts?: '',
-            ].join(" ").trim(),                                            // workflow opts
-            readWithDefault( params.demo.params_file, Channel.value([]) ), // params file
-            readWithDefault( params.demo.input, Channel.value([]) ),       // samplesheet
-            readWithDefault( params.demo.add_config, Channel.value([]) ),  // custom config
-        )
-    }
-    if ( 'fetchngs' in wf_chain ){
-        // FETCHNGS
-        NFCORE_FETCHNGS (
-            'nf-core/fetchngs',
-            "${params.general.wf_opts?: ''} ${params.fetchngs.wf_opts?: ''}",  // workflow opts
-            readWithDefault( params.fetchngs.params_file, Channel.value([]) ), // params file
-            readWithDefault( params.fetchngs.input, Channel.value([]) ),       // samplesheet
-            readWithDefault( params.fetchngs.add_config, Channel.value([]) ),  // custom config
-        )
-        fetchngs_output_samplesheet = getSamplesheet( 'samplesheet/samplesheet.csv', NFCORE_FETCHNGS.out.output )
-        fetchngs_output             = NFCORE_FETCHNGS.out.output
-    }
-    if ('rnaseq' in wf_chain ){
-        // RNASEQ
-        NFCORE_RNASEQ (
-            'nf-core/rnaseq',
-            "${ params.general.wf_opts?: ''} ${params.rnaseq.wf_opts?: ''}",     // workflow opts
-            readWithDefault( params.rnaseq.params_file, Channel.value([]) ),     // params file
-            readWithDefault( params.rnaseq.input, fetchngs_output_samplesheet ), // samplesheet
-            readWithDefault( params.rnaseq.add_config, Channel.value([]) ),      // custom config
-        )
-    }
-    if ('taxprofiler' in wf_chain ){
-        // TAXPROFILER
-        NFCORE_TAXPROFILER (
-            'nf-core/taxprofiler',
-            "${ params.general.wf_opts?: ''} ${params.taxprofiler.wf_opts?: ''}",     // workflow opts
-            readWithDefault( params.taxprofiler.params_file, Channel.value([]) ),     // params file
-            readWithDefault( params.taxprofiler.input, fetchngs_output_samplesheet ), // samplesheet
-            readWithDefault( params.taxprofiler.add_config, Channel.value([]) ),      // custom config
-        )
-    }
-    if ('mag' in wf_chain ){
-        // MAG
-        NFCORE_MAG (
-            'nf-core/mag',
-            "${ params.general.wf_opts?: ''} ${params.mag.wf_opts?: ''}",               // workflow opts
-            readWithDefault( params.mag.params_file, Channel.value([]) ),               // params file
-            readWithDefault( params.mag.input, createMagSamplesheet(fetchngs_output) ), // input
-            readWithDefault( params.mag.add_config, Channel.value([]) ),                // custom config
-        )
-        mag_output                  = NFCORE_MAG.out.output
-    }
-    if ('funcscan' in wf_chain ){
-        // FUNCSCAN
-        NFCORE_FUNCSCAN (
-            'nf-core/funcscan',
-            "${ params.general.wf_opts?: ''} ${params.funcscan.wf_opts?: ''}",               // workflow opts
-            readWithDefault( params.funcscan.params_file, Channel.value([]) ),               // params file
-            readWithDefault( params.funcscan.input, createFuncscanSamplesheet(mag_output) ), // samplesheet
-            readWithDefault( params.funcscan.add_config, Channel.value([]) ),                // custom config
-        )
-    }
+    NFCORE_FETCHNGS ( // Args: pipeline name, workflow opts, params file, samplesheet, custom config
+        Channel.value('nf-core/fetchngs').filter{ params.fetchngs_enabled },
+        "${params.all_cli: ''} ${params.fetchngs_cli?: ''}",
+        params.fetchngs_params ? file( params.fetchngs_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.fetchngs_config? file(params.fetchngs_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_DETAXIZER (
+        Channel.value('nf-core/detaxizer').filter{ params.detaxizer_enabled },
+        "${params.all_cli: ''} ${params.detaxizer_cli?: ''}",
+        params.detaxizer_params ? file( params.detaxizer_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.detaxizer_config? file(params.detaxizer_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_CREATETAXDB (
+        Channel.value('nf-core/createtaxdb').filter{ params.createtaxdb_enabled },
+        "${params.all_cli: ''} ${params.createtaxdb_cli?: ''}",
+        params.createtaxdb_params ? file( params.createtaxdb_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.createtaxdb_config? file(params.createtaxdb_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_AMPLISEQ (
+        Channel.value('nf-core/ampliseq').filter{ params.ampliseq_enabled },
+        "${params.all_cli: ''} ${params.ampliseq_cli?: ''}",
+        params.ampliseq_params ? file( params.ampliseq_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.ampliseq_config? file(params.ampliseq_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_TAXPROFILER (
+        Channel.value('nf-core/taxprofiler').filter{ params.taxprofiler_enabled },
+        "${params.all_cli: ''} ${params.taxprofiler_cli?: ''}",
+        params.taxprofiler_params ? file( params.taxprofiler_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.taxprofiler_config? file(params.taxprofiler_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_EAGER (
+        Channel.value('nf-core/eager').filter{ params.eager_enabled },
+        "${params.all_cli: ''} ${params.eager_cli?: ''}",
+        params.eager_params ? file( params.eager_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.eager_config? file(params.eager_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_MAGMAP (
+        Channel.value('nf-core/magmap').filter{ params.magmap_enabled },
+        "${params.all_cli: ''} ${params.magmap_cli?: ''}",
+        params.magmap_params ? file( params.magmap_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.magmap_config? file(params.magmap_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_MAG (
+        Channel.value('nf-core/mag').filter{ params.mag_enabled },
+        "${params.all_cli: ''} ${params.mag_cli?: ''}",
+        params.mag_params ? file( params.mag_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.mag_config? file(params.mag_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_METATDENOVO (
+        Channel.value('nf-core/metatdenovo').filter{ params.metatdenovo_enabled },
+        "${params.all_cli: ''} ${params.metatdenovo_cli?: ''}",
+        params.metatdenovo_params ? file( params.metatdenovo_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.metatdenovo_config? file(params.metatdenovo_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_DIFFERENTIALABUNDANCE (
+        Channel.value('nf-core/differentialabundance').filter{ params.differentialabundance_enabled },
+        "${params.all_cli: ''} ${params.differentialabundance_cli?: ''}",
+        params.differentialabundance_params ? file( params.differentialabundance_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.differentialabundance_config? file(params.differentialabundance_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_METAPEP (
+        Channel.value('nf-core/metapep').filter{ params.metapep_enabled },
+        "${params.all_cli: ''} ${params.metapep_cli?: ''}",
+        params.metapep_params ? file( params.metapep_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.metapep_config? file(params.metapep_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_PHAGEANNOTATOR (
+        Channel.value('nf-core/phageannotator').filter{ params.phageannotator_enabled },
+        "${params.all_cli: ''} ${params.phageannotator_cli?: ''}",
+        params.phageannotator_params ? file( params.phageannotator_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.phageannotator_config? file(params.phageannotator_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_FUNCSCAN (
+        Channel.value('nf-core/funcscan').filter{ params.funcscan_enabled },
+        "${params.all_cli: ''} ${params.funcscan_cli?: ''}",
+        params.funcscan_params ? file( params.funcscan_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.funcscan_config? file(params.funcscan_config, checkIfExists: true) : [],
+    )
+
+    NFCORE_PHYLOPLACE (
+        Channel.value('nf-core/phyloplace').filter{ params.phyloplace_enabled },
+        "${params.all_cli: ''} ${params.phyloplace_cli?: ''}",
+        params.phyloplace_params ? file( params.phyloplace_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.phyloplace_config? file(params.phyloplace_config, checkIfExists: true) : [],
+    )
 }
