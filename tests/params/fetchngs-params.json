@@ -1,5 +1,5 @@
 {
-    "input": "tests\/samplesheets\/fetchngs_samplesheet.csv",
+    "input": "..\/..\/..\/tests\/samplesheets\/fetchngs_samplesheet.csv",
     "nf_core_pipeline": "taxprofiler",
     "outdir": "results"
 }
