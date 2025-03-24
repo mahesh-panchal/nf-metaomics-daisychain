@@ -1,8 +1,12 @@
 # nf-metaomics-daisychain
 
+A Nextflow meta-pipeline for meta-omic data.
+
 ![](nf-metaomics-daisychain.png)
 
-A Nextflow meta-pipeline for meta-omic data.
+> Metro map by [James Fellows Yates](https://github.com/jfy133).
+
+> Meta pipeline based on the concept of [nf-cascade](https://github.com/mahesh-panchal/nf-cascade)
 
 > [!TIP]
 > Use `nf-core pipelines launch <pipeline>` to write the pipeline `params.yml` which can
