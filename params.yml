@@ -13,6 +13,7 @@ metapep_enabled: false
 phageannotator_enabled: false
 funcscan_enabled: false
 phyloplace_enabled: false
+gms_metaval_enabled: false
 
 ## Pipeline inputs
 ### Use nf-core launch
@@ -30,6 +31,7 @@ metapep_params: 'tests/data/metapep_samplesheet.csv'
 phageannotator_params: 'tests/data/phageannotator_samplesheet.csv'
 funcscan_params: 'tests/data/funcscan_samplesheet.csv'
 phyloplace_params: 'tests/data/phyloplace_samplesheet.csv'
+gms_metaval_params: 'tests/data/gms_metaval_samplesheet.csv'
 
 ## Command-line options
 all_cli: '-resume -ansi-log false -profile docker'
@@ -47,6 +49,7 @@ metapep_cli: ''
 phageannotator_cli: ''
 funcscan_cli: ''
 phyloplace_cli: ''
+gms_metaval_cli: ''
 
 ## Additional configuration files
 fetchngs_config: 'configs/multiqc.config'
@@ -63,3 +66,4 @@ metapep_config: 'configs/multiqc.config'
 phageannotator_config: 'configs/multiqc.config'
 funcscan_config: 'configs/multiqc.config'
 phyloplace_config: 'configs/multiqc.config'
+gms_metaval_config: 'configs/multiqc.config'

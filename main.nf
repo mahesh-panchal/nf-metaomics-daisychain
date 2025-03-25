@@ -12,6 +12,7 @@ include { NEXTFLOW_RUN as NFCORE_METAPEP               } from "$projectDir/modul
 include { NEXTFLOW_RUN as NFCORE_PHAGEANNOTATOR        } from "$projectDir/modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_FUNCSCAN              } from "$projectDir/modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_PHYLOPLACE            } from "$projectDir/modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as GMS_METAVAL                  } from "$projectDir/modules/local/nextflow/run/main"
 
 workflow {
     // TODO: Check params-file for values that override channel inputs
@@ -126,5 +127,13 @@ workflow {
         params.phyloplace_enabled && params.phyloplace_params ? file( params.phyloplace_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.phyloplace_enabled && params.phyloplace_config ? file(params.phyloplace_config, checkIfExists: true) : [],
+    )
+
+    GMS_METAVAL (
+        Channel.value('gms/metaval').filter{ params.gms_metaval_enabled },
+        "${params.all_cli?: ''} ${params.gms_metaval_cli?: ''}",
+        params.gms_metaval_enabled && params.gms_metaval_params ? file( params.gms_metaval_params, checkIfExists: true ) : [],
+        [], // Read from params-file
+        params.gms_metaval_enabled && params.gms_metaval_config ? file(params.gms_metaval_config, checkIfExists: true) : [],
     )
 }
