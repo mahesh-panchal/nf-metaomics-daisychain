@@ -49,11 +49,17 @@ workflow {
         params.ampliseq_enabled && params.ampliseq_config ? file(params.ampliseq_config, checkIfExists: true) : [],
     )
 
+    def taxprofiler_samplesheet = NFCORE_FETCHNGS.out.output
+        // Extract samplesheet from fetchngs output
+        .map { results -> results.resolve('samplesheet/samplesheet.csv') }
+        // If params file has input: override taxprofiler samplesheet
+        .filter { params.taxprofiler_enabled && params.taxprofiler_params ? file( params.taxprofiler_params, checkIfExists: true ).text.contains('input:') : true }
+        .ifEmpty([])
     NFCORE_TAXPROFILER (
         Channel.value('nf-core/taxprofiler').filter{ params.taxprofiler_enabled },
         "${params.all_cli?: ''} ${params.taxprofiler_cli?: ''}",
         params.taxprofiler_enabled && params.taxprofiler_params ? file( params.taxprofiler_params, checkIfExists: true ) : [],
-        [], // Read from params-file
+        taxprofiler_samplesheet,
         params.taxprofiler_enabled && params.taxprofiler_config ? file(params.taxprofiler_config, checkIfExists: true) : [],
     )
 
