@@ -1,0 +1,5 @@
+# nf-core/ampliseq documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/ampliseq" title="nf-core ampliseq documentation"></iframe>
+```

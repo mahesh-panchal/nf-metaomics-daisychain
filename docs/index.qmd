@@ -1,0 +1,68 @@
+---
+title: "nf-metaomics-daisychain Documentation"
+---
+
+Here is the user documentation for nf-metaomics-daisychain. It is a
+meta-pipeline that includes several pipelines from [nf-core](https://nf-co.re/).
+
+![](images/nf-metaomics-daisychain.png)
+
+## Quickstart
+
+Write a `meta-pipeline-params.yml` that enables which pipelines you want to daisy-chain together.
+
+```{.yml}
+# Run pipelines
+fetchngs_enabled: true
+detaxizer_enabled: false
+createtaxdb_enabled: false
+ampliseq_enabled: false
+taxprofiler_enabled: true
+eager_enabled: false
+magmap_enabled: false
+mag_enabled: false
+metatdenovo_enabled: false
+differentialabundance_enabled: false
+metapep_enabled: false
+phageannotator_enabled: false
+funcscan_enabled: false
+phyloplace_enabled: false
+gms_metaval_enabled: false
+```
+
+For each pipeline you want to run, you'll need to create a `params.{yml,json}` file (Ideally name it after the pipeline e.g., `fetchngs-params.yml`).
+You can do this with `nf-core pipelines launch <pipeline>`, or use the launch
+page on the nf-core website. For non-nf-core pipelines, you'll have to create
+this manually. In most cases you'll be forced to enter a value for `--input`, but
+that should be removed before using the meta-pipeline.
+
+Add these files to your `meta-pipeline-params.yml`:
+
+```{.yml}
+## Pipeline inputs
+fetchngs_params: 'tests/params/fetchngs-params.json'
+...
+```
+
+Command line interface instructions can also be added to the `meta-pipeline-params.yml`:
+
+```{.yml}
+## Command-line options
+all_cli: '-resume -ansi-log false'
+fetchngs_cli: '-r 1.12.0 -profile docker'
+taxprofiler_cli: '-r 1.2.3 -profile docker,test'
+```
+
+Custom configs can also be added similarly:
+
+```{.yml}
+## Additional configuration files
+fetchngs_config: 'configs/multiqc.config'
+taxprofiler_config: 'configs/multiqc.config'
+```
+
+The meta-pipeline is then run using:
+
+```{.bash}
+nextflow run mahesh-panchal/nf-metaomics-daisychain -params-file meta-pipeline-params.yml
+```

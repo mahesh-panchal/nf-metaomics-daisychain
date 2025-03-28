@@ -2,7 +2,7 @@
 
 A Nextflow meta-pipeline for meta-omic data.
 
-![](nf-metaomics-daisychain.png)
+![](docs/images/nf-metaomics-daisychain.png)
 
 > Metro map by [James Fellows Yates](https://github.com/jfy133).
 

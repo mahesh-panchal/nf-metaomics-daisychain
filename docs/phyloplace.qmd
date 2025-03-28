@@ -1,0 +1,5 @@
+# nf-core/phlyoplace documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/phyloplace" title="nf-core phyloplace documentation"></iframe>
+```

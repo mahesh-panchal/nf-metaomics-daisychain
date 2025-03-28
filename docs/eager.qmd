@@ -1,0 +1,4 @@
+# nf-core/eager documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/eager" title="nf-core eager documentation"></iframe>
