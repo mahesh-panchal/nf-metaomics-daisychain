@@ -10,3 +10,4 @@ version = "0.1.0"
 [dependencies]
 nextflow = ">=24.10.5,<25"
 nf-core = ">=3.2.0,<4"
+quarto = ">=1.6.42,<2"
