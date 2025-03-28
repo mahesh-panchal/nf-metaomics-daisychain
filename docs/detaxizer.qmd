@@ -1,0 +1,5 @@
+# nf-core/detaxizer documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/detaxizer" title="nf-core detaxizer documentation"></iframe>
+```

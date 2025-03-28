@@ -11,3 +11,6 @@ nxf-*/
 # pixi environments
 .pixi
 *.egg-info
+
+# quarto files
+docs/_site/

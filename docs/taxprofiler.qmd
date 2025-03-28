@@ -1,0 +1,5 @@
+# nf-core/taxprofiler documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/taxprofiler" title="nf-core taxprofiler documentation"></iframe>
+```

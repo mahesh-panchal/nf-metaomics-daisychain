@@ -1,0 +1,5 @@
+# nf-core/metapep documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/metapep" title="nf-core metapep documentation"></iframe>
+```

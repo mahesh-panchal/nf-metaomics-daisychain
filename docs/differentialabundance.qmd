@@ -1,0 +1,5 @@
+# nf-core/differentialabundance documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/differentialabundance" title="nf-core differentialabundance documentation"></iframe>
+```

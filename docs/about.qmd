@@ -1,0 +1,8 @@
+---
+title: "About"
+---
+
+nf-metaomics-daisychain is a meta-pipeline aimed at streamlining metaomic
+analyses using nf-core pipelines.
+
+TODO: Link James' video on metaomic analyses.

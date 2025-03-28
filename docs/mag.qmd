@@ -1,0 +1,5 @@
+# nf-core/mag documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/mag" title="nf-core mag documentation"></iframe>
+```

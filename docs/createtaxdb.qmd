@@ -1,0 +1,5 @@
+# nf-core/createtaxdb documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/createtaxdb" title="nf-core createtaxdb documentation"></iframe>
+```

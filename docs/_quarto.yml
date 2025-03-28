@@ -1,0 +1,51 @@
+project:
+  type: website
+
+website:
+  title: "nf-metaomics-daisychain Documentation"
+  sidebar:
+    contents:
+      - href: index.qmd
+        text: Home
+      - href: fetchngs.qmd
+        text: FetchNGS
+      - href: detaxizer.qmd
+        text: Detaxizer
+      - href: createtaxdb.qmd
+        text: CreateTaxDB
+      - href: ampliseq.qmd
+        text: AmpliSeq
+      - href: taxprofiler.qmd
+        text: TaxProfiler
+      - href: eager.qmd
+        text: EAGER
+      - href: magmap.qmd
+        text: MAGMAp
+      - href: mag.qmd
+        text: MAG
+      - href: metatdenovo.qmd
+        text: MetaTDenovo
+      - href: differentialabundance.qmd
+        text: DifferentialAbundance
+      - href: metapep.qmd
+        text: MetaPep
+      - href: phageannotator.qmd
+        text: PhageAnnotator
+      - href: funcscan.qmd
+        text: FuncScan
+      - href: phyloplace.qmd
+        text: PhyloPlace
+      - href: gms_metaval.qmd
+        text: GMS MetaVal
+      - about.qmd
+
+format:
+  html:
+    theme:
+      - minty
+      - brand
+    css: styles.css
+    toc: true
+
+
+
