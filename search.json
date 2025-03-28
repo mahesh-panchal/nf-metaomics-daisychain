@@ -1,0 +1,182 @@
+[
+  {
+    "objectID": "gms_metaval.html",
+    "href": "gms_metaval.html",
+    "title": "gms/metaval documentation",
+    "section": "",
+    "text": "gms/metaval documentation\nGo to https://github.com/genomic-medicine-sweden/metaval.",
+    "crumbs": [
+      "GMS MetaVal"
+    ]
+  },
+  {
+    "objectID": "funcscan.html",
+    "href": "funcscan.html",
+    "title": "nf-core/funcscan documentation",
+    "section": "",
+    "text": "nf-core/funcscan documentation",
+    "crumbs": [
+      "FuncScan"
+    ]
+  },
+  {
+    "objectID": "eager.html",
+    "href": "eager.html",
+    "title": "nf-core/eager documentation",
+    "section": "",
+    "text": "nf-core/eager documentation",
+    "crumbs": [
+      "EAGER"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "nf-metaomics-daisychain is a meta-pipeline aimed at streamlining metaomic analyses using nf-core pipelines.\nTODO: Link James’ video on metaomic analyses.",
+    "crumbs": [
+      "About"
+    ]
+  },
+  {
+    "objectID": "metapep.html",
+    "href": "metapep.html",
+    "title": "nf-core/metapep documentation",
+    "section": "",
+    "text": "nf-core/metapep documentation",
+    "crumbs": [
+      "MetaPep"
+    ]
+  },
+  {
+    "objectID": "metatdenovo.html",
+    "href": "metatdenovo.html",
+    "title": "nf-core/metatdenovo documentation",
+    "section": "",
+    "text": "nf-core/metatdenovo documentation",
+    "crumbs": [
+      "MetaTDenovo"
+    ]
+  },
+  {
+    "objectID": "differentialabundance.html",
+    "href": "differentialabundance.html",
+    "title": "nf-core/differentialabundance documentation",
+    "section": "",
+    "text": "nf-core/differentialabundance documentation",
+    "crumbs": [
+      "DifferentialAbundance"
+    ]
+  },
+  {
+    "objectID": "detaxizer.html",
+    "href": "detaxizer.html",
+    "title": "nf-core/detaxizer documentation",
+    "section": "",
+    "text": "nf-core/detaxizer documentation",
+    "crumbs": [
+      "Detaxizer"
+    ]
+  },
+  {
+    "objectID": "mag.html",
+    "href": "mag.html",
+    "title": "nf-core/mag documentation",
+    "section": "",
+    "text": "nf-core/mag documentation",
+    "crumbs": [
+      "MAG"
+    ]
+  },
+  {
+    "objectID": "taxprofiler.html",
+    "href": "taxprofiler.html",
+    "title": "nf-core/taxprofiler documentation",
+    "section": "",
+    "text": "nf-core/taxprofiler documentation",
+    "crumbs": [
+      "TaxProfiler"
+    ]
+  },
+  {
+    "objectID": "createtaxdb.html",
+    "href": "createtaxdb.html",
+    "title": "nf-core/createtaxdb documentation",
+    "section": "",
+    "text": "nf-core/createtaxdb documentation",
+    "crumbs": [
+      "CreateTaxDB"
+    ]
+  },
+  {
+    "objectID": "fetchngs.html",
+    "href": "fetchngs.html",
+    "title": "nf-core/fetchngs documentation",
+    "section": "",
+    "text": "nf-core/fetchngs documentation",
+    "crumbs": [
+      "FetchNGS"
+    ]
+  },
+  {
+    "objectID": "phyloplace.html",
+    "href": "phyloplace.html",
+    "title": "nf-core/phlyoplace documentation",
+    "section": "",
+    "text": "nf-core/phlyoplace documentation",
+    "crumbs": [
+      "PhyloPlace"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "nf-metaomics-daisychain Documentation",
+    "section": "",
+    "text": "Here is the user documentation for nf-metaomics-daisychain. It is a meta-pipeline that includes several pipelines from nf-core.",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "index.html#quickstart",
+    "href": "index.html#quickstart",
+    "title": "nf-metaomics-daisychain Documentation",
+    "section": "Quickstart",
+    "text": "Quickstart\nWrite a meta-pipeline-params.yml that enables which pipelines you want to daisy-chain together.\n# Run pipelines\nfetchngs_enabled: true\ndetaxizer_enabled: false\ncreatetaxdb_enabled: false\nampliseq_enabled: false\ntaxprofiler_enabled: true\neager_enabled: false\nmagmap_enabled: false\nmag_enabled: false\nmetatdenovo_enabled: false\ndifferentialabundance_enabled: false\nmetapep_enabled: false\nphageannotator_enabled: false\nfuncscan_enabled: false\nphyloplace_enabled: false\ngms_metaval_enabled: false\nFor each pipeline you want to run, you’ll need to create a params.{yml,json} file (Ideally name it after the pipeline e.g., fetchngs-params.yml). You can do this with nf-core pipelines launch &lt;pipeline&gt;, or use the launch page on the nf-core website. For non-nf-core pipelines, you’ll have to create this manually. In most cases you’ll be forced to enter a value for --input, but that should be removed before using the meta-pipeline.\nAdd these files to your meta-pipeline-params.yml:\n## Pipeline inputs\nfetchngs_params: 'tests/params/fetchngs-params.json'\n...\nCommand line interface instructions can also be added to the meta-pipeline-params.yml:\n## Command-line options\nall_cli: '-resume -ansi-log false'\nfetchngs_cli: '-r 1.12.0 -profile docker'\ntaxprofiler_cli: '-r 1.2.3 -profile docker,test'\nCustom configs can also be added similarly:\n## Additional configuration files\nfetchngs_config: 'configs/multiqc.config'\ntaxprofiler_config: 'configs/multiqc.config'\nThe meta-pipeline is then run using:\nnextflow run mahesh-panchal/nf-metaomics-daisychain -params-file meta-pipeline-params.yml",
+    "crumbs": [
+      "Home"
+    ]
+  },
+  {
+    "objectID": "magmap.html",
+    "href": "magmap.html",
+    "title": "nf-core/magmap documentation",
+    "section": "",
+    "text": "nf-core/magmap documentation",
+    "crumbs": [
+      "MAGMAp"
+    ]
+  },
+  {
+    "objectID": "ampliseq.html",
+    "href": "ampliseq.html",
+    "title": "nf-core/ampliseq documentation",
+    "section": "",
+    "text": "nf-core/ampliseq documentation",
+    "crumbs": [
+      "AmpliSeq"
+    ]
+  },
+  {
+    "objectID": "phageannotator.html",
+    "href": "phageannotator.html",
+    "title": "nf-core/phageannotator documentation",
+    "section": "",
+    "text": "nf-core/phageannotator documentation",
+    "crumbs": [
+      "PhageAnnotator"
+    ]
+  }
+]
