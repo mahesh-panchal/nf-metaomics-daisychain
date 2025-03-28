@@ -1,0 +1,13 @@
+[workspace]
+authors = ["Mahesh Binzer-Panchal <mahesh.binzer-panchal@nbis.se>"]
+channels = ["conda-forge", "bioconda"]
+name = "nf-metaomics-daisychain"
+platforms = ["linux-64", "osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+nextflow = ">=24.10.5,<25"
+nf-core = ">=3.2.0,<4"
+quarto = ">=1.6.42,<2"
