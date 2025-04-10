@@ -1,5 +1,10 @@
 # nf-metaomics-daisychain
 
+> [!IMPORTANT]
+> This is work-in-progress and not yet ready for use.
+> A major issue at the moment is the wrapper process does not resume.
+> Until a solution for this is found, this project is on hold.
+
 A Nextflow meta-pipeline for meta-omic data.
 
 ![](docs/images/nf-metaomics-daisychain.png)
