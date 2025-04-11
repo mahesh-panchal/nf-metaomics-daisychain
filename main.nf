@@ -23,6 +23,7 @@ workflow {
         params.fetchngs_enabled && params.fetchngs_params ? file( params.fetchngs_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.fetchngs_enabled && params.fetchngs_config ? file(params.fetchngs_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/fetchngs').toUriString(),
     )
 
     NFCORE_DETAXIZER (
@@ -31,6 +32,7 @@ workflow {
         params.detaxizer_enabled && params.detaxizer_params ? file( params.detaxizer_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.detaxizer_enabled && params.detaxizer_config ? file(params.detaxizer_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/detaxizer').toUriString(),
     )
 
     NFCORE_CREATETAXDB (
@@ -39,6 +41,7 @@ workflow {
         params.createtaxdb_enabled && params.createtaxdb_params ? file( params.createtaxdb_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.createtaxdb_enabled && params.createtaxdb_config ? file(params.createtaxdb_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/createtaxdb').toUriString(),
     )
 
     NFCORE_AMPLISEQ (
@@ -47,6 +50,7 @@ workflow {
         params.ampliseq_enabled && params.ampliseq_params ? file( params.ampliseq_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.ampliseq_enabled && params.ampliseq_config ? file(params.ampliseq_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/ampliseq').toUriString(),
     )
 
     def taxprofiler_samplesheet = NFCORE_FETCHNGS.out.output
@@ -61,6 +65,7 @@ workflow {
         params.taxprofiler_enabled && params.taxprofiler_params ? file( params.taxprofiler_params, checkIfExists: true ) : [],
         taxprofiler_samplesheet,
         params.taxprofiler_enabled && params.taxprofiler_config ? file(params.taxprofiler_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/taxprofiler').toUriString(),
     )
 
     NFCORE_EAGER (
@@ -69,6 +74,7 @@ workflow {
         params.eager_enabled && params.eager_params ? file( params.eager_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.eager_enabled && params.eager_config ? file(params.eager_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/eager').toUriString(),
     )
 
     NFCORE_MAGMAP (
@@ -77,6 +83,7 @@ workflow {
         params.magmap_enabled && params.magmap_params ? file( params.magmap_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.magmap_enabled && params.magmap_config ? file(params.magmap_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/magmap').toUriString(),
     )
 
     NFCORE_MAG (
@@ -85,6 +92,7 @@ workflow {
         params.mag_enabled && params.mag_params ? file( params.mag_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.mag_enabled && params.mag_config ? file(params.mag_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/mag').toUriString(),
     )
 
     NFCORE_METATDENOVO (
@@ -93,6 +101,7 @@ workflow {
         params.metatdenovo_enabled && params.metatdenovo_params ? file( params.metatdenovo_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.metatdenovo_enabled && params.metatdenovo_config? file(params.metatdenovo_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/metatdenovo').toUriString(),
     )
 
     NFCORE_DIFFERENTIALABUNDANCE (
@@ -101,6 +110,7 @@ workflow {
         params.differentialabundance_enabled && params.differentialabundance_params ? file( params.differentialabundance_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.differentialabundance_enabled && params.differentialabundance_config? file(params.differentialabundance_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/differentialabundance').toUriString(),
     )
 
     NFCORE_METAPEP (
@@ -109,6 +119,7 @@ workflow {
         params.metapep_enabled && params.metapep_params ? file( params.metapep_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.metapep_enabled && params.metapep_config ? file(params.metapep_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/metapep').toUriString(),
     )
 
     NFCORE_PHAGEANNOTATOR (
@@ -117,6 +128,7 @@ workflow {
         params.phageannotator_enabled && params.phageannotator_params ? file( params.phageannotator_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.phageannotator_enabled && params.phageannotator_config ? file(params.phageannotator_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/phageannotator').toUriString(),
     )
 
     NFCORE_FUNCSCAN (
@@ -125,6 +137,7 @@ workflow {
         params.funcscan_enabled && params.funcscan_params ? file( params.funcscan_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.funcscan_enabled && params.funcscan_config ? file(params.funcscan_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/funcscan').toUriString(),
     )
 
     NFCORE_PHYLOPLACE (
@@ -133,6 +146,7 @@ workflow {
         params.phyloplace_enabled && params.phyloplace_params ? file( params.phyloplace_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.phyloplace_enabled && params.phyloplace_config ? file(params.phyloplace_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('nf-core/phyloplace').toUriString(),
     )
 
     GMS_METAVAL (
@@ -141,5 +155,6 @@ workflow {
         params.gms_metaval_enabled && params.gms_metaval_params ? file( params.gms_metaval_params, checkIfExists: true ) : [],
         [], // Read from params-file
         params.gms_metaval_enabled && params.gms_metaval_config ? file(params.gms_metaval_config, checkIfExists: true) : [],
+        workflow.workDir.resolve('gms/metaval').toUriString(),
     )
 }
