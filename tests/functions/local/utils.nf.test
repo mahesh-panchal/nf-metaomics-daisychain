@@ -291,4 +291,114 @@ nextflow_function {
 
     }
 
+    test("Test Function createHlatypingSamplesheet - reprojects fetchngs samplesheet") {
+
+        function "createHlatypingSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/fetchngs_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createHlatypingSamplesheetFromDetaxizer - builds from filtered reads") {
+
+        function "createHlatypingSamplesheetFromDetaxizer"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/detaxizer_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createCoproidSamplesheet - reprojects fetchngs samplesheet") {
+
+        function "createCoproidSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/fetchngs_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createCoproidSamplesheetFromDetaxizer - builds from filtered reads") {
+
+        function "createCoproidSamplesheetFromDetaxizer"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/detaxizer_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createMetapepSamplesheet - real alleles from hlatyping") {
+
+        function "createMetapepSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/mag_output_fixture")
+                input[1] = Channel.fromPath("$projectDir/tests/data/hlatyping_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createFuncscanSamplesheet - proteinfamilies glob (mag Prodigal proteins)") {
+
+        function "createFuncscanSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/mag_output_fixture")
+                input[1] = 'Annotation/Prodigal/*.faa.gz'
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
 }

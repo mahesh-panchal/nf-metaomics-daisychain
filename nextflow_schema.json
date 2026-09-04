@@ -89,6 +89,21 @@
             "default": false,
             "description": "Run phyloplace as part of the chain."
         },
+        "enable_hlatyping": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run hlatyping as part of the chain."
+        },
+        "enable_coproid": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run coproid as part of the chain."
+        },
+        "enable_proteinfamilies": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run proteinfamilies as part of the chain."
+        },
         "fetchngs": {
             "type": "object",
             "properties": {
@@ -436,6 +451,81 @@
                     "type": "string",
                     "default": "",
                     "description": "Additional config file for phyloplace (-c)."
+                }
+            }
+        },
+        "hlatyping": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for hlatyping (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for hlatyping (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for hlatyping."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for hlatyping (-c)."
+                }
+            }
+        },
+        "coproid": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for coproid (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for coproid (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for coproid."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for coproid (-c)."
+                }
+            }
+        },
+        "proteinfamilies": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for proteinfamilies (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for proteinfamilies (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for proteinfamilies."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for proteinfamilies (-c)."
                 }
             }
         }
@@ -1369,6 +1459,230 @@
                     {
                         "properties": {
                             "phyloplace": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_hlatyping"
+                ],
+                "properties": {
+                    "enable_hlatyping": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_detaxizer"
+                        ],
+                        "properties": {
+                            "enable_detaxizer": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "hlatyping": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "hlatyping": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "hlatyping": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_coproid"
+                ],
+                "properties": {
+                    "enable_coproid": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_detaxizer"
+                        ],
+                        "properties": {
+                            "enable_detaxizer": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "coproid": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "coproid": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "coproid": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_proteinfamilies"
+                ],
+                "properties": {
+                    "enable_proteinfamilies": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_mag"
+                        ],
+                        "properties": {
+                            "enable_mag": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "proteinfamilies": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "proteinfamilies": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "proteinfamilies": {
                                 "required": [
                                     "wf_opts"
                                 ],

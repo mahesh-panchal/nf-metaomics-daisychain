@@ -12,6 +12,9 @@ include { NEXTFLOW_RUN as NFCORE_METAPEP               } from "./modules/local/n
 include { NEXTFLOW_RUN as NFCORE_PHAGEANNOTATOR        } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_FUNCSCAN              } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_PHYLOPLACE            } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_HLATYPING             } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_COPROID                } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_PROTEINFAMILIES        } from "./modules/local/nextflow/run/main"
 include { readWithDefault                              } from "./functions/local/utils"
 include { resolveFileFromDir as getSamplesheet         } from "./functions/local/utils"
 include { createMagSamplesheet                         } from "./functions/local/utils"
@@ -25,6 +28,10 @@ include { createEagerSamplesheet                       } from "./functions/local
 include { createEagerSamplesheetFromDetaxizer          } from "./functions/local/utils"
 include { createMetapepSamplesheet                     } from "./functions/local/utils"
 include { createDifferentialabundanceMatrix            } from "./functions/local/utils"
+include { createHlatypingSamplesheet                   } from "./functions/local/utils"
+include { createHlatypingSamplesheetFromDetaxizer      } from "./functions/local/utils"
+include { createCoproidSamplesheet                     } from "./functions/local/utils"
+include { createCoproidSamplesheetFromDetaxizer        } from "./functions/local/utils"
 include { validateParameters                           } from "plugin/nf-schema"
 
 workflow {
@@ -51,6 +58,7 @@ workflow {
     def mag_output                   = []
     def metatdenovo_output           = []
     def magmap_output                = []
+    def hlatyping_output             = []
     def createtaxdb_databases        = Channel.value([])
 
     // Run pipelines
@@ -149,6 +157,45 @@ workflow {
             workflow.workDir.resolve('nf-core/eager').toUriString(),
         )
     }
+    if (params.enable_hlatyping) {
+        // FETCHNGS/DETAXIZER -> HLATYPING, same shared reads pool as eager/mag. HLA
+        // typing is a HOST-genome analysis, not a microbiome one - only meaningful
+        // when a host DNA fraction is actually present (e.g. this repo's own ancient
+        // dental calculus test data). Its own output feeds METAPEP's alleles column
+        // below with real per-sample genotypes instead of a placeholder.
+        def hlatyping_default_input = createHlatypingSamplesheet(fetchngs_output)
+        if (detaxizer_output) {
+            hlatyping_default_input = createHlatypingSamplesheetFromDetaxizer(detaxizer_output)
+        }
+        NFCORE_HLATYPING (
+            'nf-core/hlatyping',
+            "${params.general.wf_opts ?: ''} ${params.hlatyping.wf_opts ?: ''}",
+            readWithDefault( params.hlatyping.params_file, Channel.value([]) ),
+            readWithDefault( params.hlatyping.input, hlatyping_default_input ),
+            readWithDefault( params.hlatyping.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/hlatyping').toUriString(),
+        )
+        hlatyping_output = NFCORE_HLATYPING.out.output
+    }
+    if (params.enable_coproid) {
+        // FETCHNGS/DETAXIZER -> COPROID, same shared reads pool as eager/mag - an
+        // ancient-DNA/coprolite-focused sibling to eager. Always needs its own
+        // genomesheet (candidate host/source genomes), --kraken2_db, --sp_sources and
+        // --sp_labels via coproid.params_file: no upstream stage carries that
+        // information, and coproid's own validation catches a missing one.
+        def coproid_default_input = createCoproidSamplesheet(fetchngs_output)
+        if (detaxizer_output) {
+            coproid_default_input = createCoproidSamplesheetFromDetaxizer(detaxizer_output)
+        }
+        NFCORE_COPROID (
+            'nf-core/coproid',
+            "${params.general.wf_opts ?: ''} ${params.coproid.wf_opts ?: ''}",
+            readWithDefault( params.coproid.params_file, Channel.value([]) ),
+            readWithDefault( params.coproid.input, coproid_default_input ),
+            readWithDefault( params.coproid.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/coproid').toUriString(),
+        )
+    }
     if (params.enable_mag) {
         // FETCHNGS -> MAG. DETAXIZER -> MAG takes priority when detaxizer ran: its own
         // natively-generated downstream_samplesheets/mag-se.csv. Only the single-end
@@ -231,15 +278,14 @@ workflow {
         )
     }
     if (params.enable_metapep) {
-        // MAG -> METAPEP (type=assembly, one condition per sample). alleles defaults to
-        // a real HLA-I example pair from nf-core/metapep's own test data, not real
-        // subject typing - see createMetapepSamplesheet. Always review before trusting
-        // epitope predictions.
+        // MAG -> METAPEP (type=assembly, one condition per sample). HLATYPING -> METAPEP
+        // fills alleles with real per-sample HLA genotypes when hlatyping ran; otherwise
+        // falls back to a placeholder example pair - see createMetapepSamplesheet.
         NFCORE_METAPEP (
             'nf-core/metapep',
             "${params.general.wf_opts ?: ''} ${params.metapep.wf_opts ?: ''}",
             readWithDefault( params.metapep.params_file, Channel.value([]) ),
-            readWithDefault( params.metapep.input, createMetapepSamplesheet(mag_output) ),
+            readWithDefault( params.metapep.input, createMetapepSamplesheet(mag_output, hlatyping_output) ),
             readWithDefault( params.metapep.add_config, Channel.value([]) ),
             workflow.workDir.resolve('nf-core/metapep').toUriString(),
         )
@@ -273,6 +319,24 @@ workflow {
             readWithDefault( params.funcscan.input, funcscan_default_input ),
             readWithDefault( params.funcscan.add_config, Channel.value([]) ),
             workflow.workDir.resolve('nf-core/funcscan').toUriString(),
+        )
+    }
+    if (params.enable_proteinfamilies) {
+        // MAG -> PROTEINFAMILIES: mag's own unconditional per-assembly gene-prediction
+        // step (Prodigal, `Annotation/Prodigal/[assembler]-[sample].faa.gz`) is a more
+        // reliable protein source here than funcscan's - funcscan only runs its own
+        // annotation subworkflow when ARG screening's deeparg, AMP, BGC, or CAZyme
+        // screening is enabled, and this repo's own funcscan wiring keeps deeparg/AMP/
+        // CAZyme off for single-sample reliability (see tests/chains.nf.test), so it
+        // wouldn't reliably produce one. Reuses createFuncscanSamplesheet's sample,fasta
+        // shape - proteinfamilies' own schema is identical.
+        NFCORE_PROTEINFAMILIES (
+            'nf-core/proteinfamilies',
+            "${params.general.wf_opts ?: ''} ${params.proteinfamilies.wf_opts ?: ''}",
+            readWithDefault( params.proteinfamilies.params_file, Channel.value([]) ),
+            readWithDefault( params.proteinfamilies.input, createFuncscanSamplesheet(mag_output, 'Annotation/Prodigal/*.faa.gz') ),
+            readWithDefault( params.proteinfamilies.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/proteinfamilies').toUriString(),
         )
     }
     if (params.enable_phyloplace) {

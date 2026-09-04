@@ -142,6 +142,36 @@ nextflow_pipeline {
 
     }
 
+    test("fetchngs -> hlatyping (HLA typing from our own reprojected samplesheet)") {
+
+        when {
+            params {
+                enable_fetchngs = true
+                enable_hlatyping = true
+                general {
+                    wf_opts     = '-resume -ansi-log false'
+                }
+                fetchngs {
+                    input       = "$projectDir/tests/samplesheets/fetchngs_samplesheet.csv"
+                    wf_opts     = '-r 1.12.0 -profile docker'
+                }
+                hlatyping {
+                    // No wf_opts "test" marker on purpose: this deliberately exercises
+                    // createHlatypingSamplesheet's real reprojection of our own fetchngs
+                    // output (not hlatyping's own bundled -profile test sample) - the
+                    // schema still accepts it because enable_fetchngs satisfies hlatyping's
+                    // upstream requirement.
+                    wf_opts     = '-r 2.2.0 -profile docker'
+                }
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
     // Missing chain: the metro map's "profiles" node conceptually includes ampliseq's
     // (and taxprofiler's) output alongside magmap's, but only magmap -> differentialabundance
     // is actually auto-wired (see createDifferentialabundanceMatrix) - ampliseq's own

@@ -229,26 +229,136 @@ def createEagerSamplesheetFromDetaxizer(Object dir) {
  * Returns a channel with a samplesheet for nf-core/metapep (type=assembly), built from
  * nf-core/mag's MEGAHIT contigs - one condition per sample/assembly, condition named
  * after the sample (no grouping assumed, same neutral-default spirit as
- * createMagSamplesheet's group=0). `alleles` defaults to "A*01:01 B*07:02" - the exact
- * example HLA-I allele pair from nf-core/metapep's own test-datasets samplesheet
- * (github.com/nf-core/test-datasets, metapep branch), not fabricated here - but real
- * HLA typing is per-subject and can't be inferred from an assembly, so this is a
- * structural placeholder: override `metapep.input`/`.params_file` with your own
- * alleles before trusting epitope predictions. `weights_path` is left blank (optional
- * per metapep's own schema).
+ * createMagSamplesheet's group=0). `weights_path` is left blank (optional per metapep's
+ * own schema).
  *
- * @param dir   A channel with a directory (an nf-core/mag results dir).
+ * `alleles` uses real per-sample HLA genotypes from nf-core/hlatyping's OptiType output
+ * (`optitype/<sample>/<sample>_result.tsv`, tab-separated with columns
+ * A1,A2,B1,B2,C1,C2,Reads,Objective - verified against a real run) when `hlatypingDir`
+ * is given, falling back to "A*01:01 B*07:02" - the exact example HLA-I allele pair
+ * from nf-core/metapep's own test-datasets samplesheet, not fabricated here - for any
+ * sample hlatyping didn't call (or when hlatyping wasn't run at all). Real typing is
+ * still preferable to review even when available: OptiType only calls Class I
+ * (A/B/C) alleles, and HLA typing is a host-genome analysis - only meaningful when a
+ * host DNA fraction is actually present in the sample (e.g. this repo's own ancient
+ * dental calculus test data), not for purely environmental metagenomes.
+ *
+ * @param dir            A channel with a directory (an nf-core/mag results dir).
+ * @param hlatypingDir   A channel with a directory (an nf-core/hlatyping results dir),
+ *                       or falsy to always use the placeholder alleles.
+ * @return               A channel with a samplesheet or empty list
+ */
+def createMetapepSamplesheet(Object dir, Object hlatypingDir = null) {
+    if (dir) {
+        def alleles_by_sample = hlatypingDir
+            ? hlatypingDir.map { results ->
+                files(results.resolve('optitype/*/*_result.tsv'), checkIfExists: false).collectEntries { tsv ->
+                    def lines = tsv.readLines()
+                    def alleles = lines.size() > 1
+                        ? lines[1].split('\t')[1..6].findAll { it && it != 'nan' }.join(' ')
+                        : ''
+                    [(tsv.simpleName - '_result'): alleles]
+                }.findAll { sample, alleles -> alleles }
+            }
+            : channel.value([:])
+        dir.combine(alleles_by_sample).map { results, alleles ->
+            (["condition,type,microbiome_path,alleles,weights_path"] + files(results.resolve('Assembly/MEGAHIT/*.fa.gz'), checkIfExists: true).collect { file ->
+                def sample = file.simpleName
+                "${sample},assembly,${file},${alleles[sample] ?: 'A*01:01 B*07:02'},"
+            }).join("\n")
+        }
+        .collectFile(name: 'metapep_samplesheet.csv')
+    }
+    else {
+        channel.value([])
+    }
+}
+
+/**
+ * Returns a channel with a samplesheet for nf-core/hlatyping, reprojecting
+ * nf-core/fetchngs' default samplesheet to hlatyping's sample,fastq_1,fastq_2,
+ * seq_type schema (fetchngs' --nf_core_pipeline auto-formatting does not cover
+ * hlatyping, unlike rnaseq/atacseq/viralrecon/taxprofiler). seq_type defaults to
+ * 'dna'. HLA typing is a HOST-genome analysis, not a microbiome one - see
+ * createMetapepSamplesheet for when this is actually meaningful to run.
+ *
+ * @param dir   A channel with a directory (an nf-core/fetchngs results dir).
  * @return      A channel with a samplesheet or empty list
  */
-def createMetapepSamplesheet(Object dir) {
+def createHlatypingSamplesheet(Object dir) {
+    if (dir) {
+        readFetchngsSamplesheet(dir)
+            .map { row -> "${row.sample},${row.fastq_1},${row.fastq_2 ?: ''},dna" }
+            .collectFile(name: 'hlatyping_samplesheet.csv', newLine: true, sort: false, seed: 'sample,fastq_1,fastq_2,seq_type')
+    }
+    else {
+        channel.value([])
+    }
+}
+
+/**
+ * Returns a channel with a samplesheet for nf-core/hlatyping, built from
+ * nf-core/detaxizer's decontaminated single-end reads. See createHlatypingSamplesheet
+ * for the seq_type/host-vs-microbiome caveat.
+ *
+ * @param dir   A channel with a directory (an nf-core/detaxizer results dir).
+ * @return      A channel with a samplesheet or empty list
+ */
+def createHlatypingSamplesheetFromDetaxizer(Object dir) {
     if (dir) {
         dir
             .map { results ->
-                (["condition,type,microbiome_path,alleles,weights_path"] + files(results.resolve('Assembly/MEGAHIT/*.fa.gz'), checkIfExists: true).collect { file ->
-                    "${file.simpleName},assembly,${file},A*01:01 B*07:02,"
+                (["sample,fastq_1,fastq_2,seq_type"] + files(results.resolve('filter/filtered/*_filtered.fastq.gz'), checkIfExists: true).collect { file ->
+                    "${file.simpleName - '_filtered'},${file},,dna"
                 }).join("\n")
             }
-            .collectFile(name: 'metapep_samplesheet.csv')
+            .collectFile(name: 'hlatyping_samplesheet.csv')
+    }
+    else {
+        channel.value([])
+    }
+}
+
+/**
+ * Returns a channel with a samplesheet for nf-core/coproid, reprojecting
+ * nf-core/fetchngs' default samplesheet to coproid's sample,fastq_1,fastq_2 schema
+ * (fetchngs' --nf_core_pipeline auto-formatting does not cover coproid, unlike
+ * rnaseq/atacseq/viralrecon/taxprofiler). coproid also always needs its own
+ * genomesheet (candidate host/source genomes), --kraken2_db, --sp_sources and
+ * --sp_labels - always user-supplied via coproid.params_file, since no upstream
+ * stage carries that information; coproid's own validation catches a missing one.
+ *
+ * @param dir   A channel with a directory (an nf-core/fetchngs results dir).
+ * @return      A channel with a samplesheet or empty list
+ */
+def createCoproidSamplesheet(Object dir) {
+    if (dir) {
+        readFetchngsSamplesheet(dir)
+            .map { row -> "${row.sample},${row.fastq_1},${row.fastq_2 ?: ''}" }
+            .collectFile(name: 'coproid_samplesheet.csv', newLine: true, sort: false, seed: 'sample,fastq_1,fastq_2')
+    }
+    else {
+        channel.value([])
+    }
+}
+
+/**
+ * Returns a channel with a samplesheet for nf-core/coproid, built from
+ * nf-core/detaxizer's decontaminated single-end reads. See createCoproidSamplesheet
+ * for the always-manual genomesheet/kraken2_db/sourcepredict caveat.
+ *
+ * @param dir   A channel with a directory (an nf-core/detaxizer results dir).
+ * @return      A channel with a samplesheet or empty list
+ */
+def createCoproidSamplesheetFromDetaxizer(Object dir) {
+    if (dir) {
+        dir
+            .map { results ->
+                (["sample,fastq_1,fastq_2"] + files(results.resolve('filter/filtered/*_filtered.fastq.gz'), checkIfExists: true).collect { file ->
+                    "${file.simpleName - '_filtered'},${file},"
+                }).join("\n")
+            }
+            .collectFile(name: 'coproid_samplesheet.csv')
     }
     else {
         channel.value([])
