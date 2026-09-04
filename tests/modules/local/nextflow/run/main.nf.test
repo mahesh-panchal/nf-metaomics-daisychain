@@ -1,0 +1,29 @@
+nextflow_process {
+
+    name "Test Process NEXTFLOW_RUN"
+    script "modules/local/nextflow/run/main.nf"
+    process "NEXTFLOW_RUN"
+
+    test("Nextflow run nf-core/demo - docker,test") {
+
+        when {
+            process {
+                """
+                input[0] = 'nf-core/demo'
+                input[1] = '-r 1.2.0 -ansi-log false -profile docker,test'
+                input[2] = Channel.value([])
+                input[3] = Channel.value([])
+                input[4] = file("$projectDir/configs/multiqc.config", checkIfExists: true)
+                input[5] = workflow.workDir.resolve('nf-core-demo-test').toUriString()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}

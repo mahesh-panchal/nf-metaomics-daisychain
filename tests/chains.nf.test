@@ -1,0 +1,173 @@
+nextflow_pipeline {
+
+    name "Test common chain combinations"
+    script "main.nf"
+
+    // fetchngs itself always needs some real accession to fetch - nf-core/fetchngs's
+    // own -profile test downloads 10 accessions (including a GEO series), which is
+    // heavy for a wiring test, so fetchngs keeps using this repo's existing minimal
+    // single-accession fixture as the chain's entry point. Every pipeline downstream
+    // of fetchngs runs its own `-profile docker,test` as requested - the auto-wired
+    // samplesheet from the upstream stage still takes priority over whatever sample
+    // each test profile bundles, since NEXTFLOW_RUN always appends --input last
+    // (verified empirically earlier: repeated pipeline-level --param flags let the
+    // last value win, unlike -profile).
+
+    test("fetchngs -> mag -> funcscan (assembly, binning, AMR/BGC/AMP screening)") {
+
+        when {
+            params {
+                enable_fetchngs = true
+                enable_mag      = true
+                enable_funcscan = true
+                general {
+                    wf_opts     = '-resume -ansi-log false'
+                }
+                fetchngs {
+                    input       = "$projectDir/tests/samplesheets/fetchngs_samplesheet.csv"
+                    wf_opts     = '-r 1.12.0 -profile docker'
+                }
+                mag {
+                    // --skip_binning: our single, small real test sample is too small/
+                    // simple for every binner mag ships (MaxBin2: "dataset cannot be
+                    // binned"; SemiBin2: needs contigs >=1500bp, we have 3) - the same
+                    // class of issue mag's own test profile already works around by
+                    // skipping CONCOCT/COMEBin/MetaBinner for its own bundled data.
+                    // funcscan/metapep both only consume mag's assembly output, not
+                    // its bins, so skipping binning entirely doesn't affect either chain.
+                    wf_opts     = '-r 5.5.0 -profile docker,test --skip_binning true'
+                }
+                funcscan {
+                    // --arg_skip_deeparg: DeepARG downloads its database from an external
+                    // host at runtime (not container-bundled); that download intermittently
+                    // returns a corrupted/non-zip response on this host - external network
+                    // flakiness, not a wiring issue. The original daisychain's own
+                    // meta-pipeline-params.yml already anticipated this class of fragility
+                    // by skipping deeparg/rgi/fargene in its own funcscan example config.
+                    // --run_amp_screening false: AMPcombi's "complete" step hard-requires
+                    // more than one sample's summary file to combine ("Only one file was
+                    // given... Please provide more than one file") - a real funcscan/
+                    // AMPcombi limitation with single-sample input, not a wiring bug.
+                    // --run_cazyme_screening false: dbCAN's DIAMOND CAZy search gets
+                    // SIGKILLed (OOM) on this host's available memory. ARG screening
+                    // (AMRFinderPlus/RGI/fARGene/hamronization) already exercises the
+                    // mag -> funcscan chain fully without either.
+                    wf_opts     = '-r 4.0.0 -profile docker,test --arg_skip_deeparg true --run_amp_screening false --run_cazyme_screening false'
+                }
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("fetchngs -> detaxizer -> taxprofiler (decontamination, taxonomic profiling)") {
+
+        when {
+            params {
+                enable_fetchngs    = true
+                enable_detaxizer   = true
+                enable_taxprofiler = true
+                general {
+                    wf_opts        = '-resume -ansi-log false'
+                }
+                fetchngs {
+                    input          = "$projectDir/tests/samplesheets/fetchngs_samplesheet.csv"
+                    wf_opts        = '-r 1.12.0 -profile docker'
+                }
+                detaxizer {
+                    wf_opts        = '-r 1.3.0 -profile docker,test'
+                }
+                taxprofiler {
+                    // --run_kraken2/--run_bracken false, multiqc-pin.config: see
+                    // tests/main.nf.test - same unrelated ARM64/Docker-emulation
+                    // container bugs (krakentools, MultiQC 1.34), not specific to
+                    // this chain.
+                    wf_opts        = '-r 2.0.1 -profile docker,test --run_kraken2 false --run_bracken false'
+                    add_config     = "$projectDir/configs/multiqc-pin.config"
+                }
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    // NOTE: on this host, nf-core/metapep's epytope container
+    // (quay.io/biocontainers/epytope:3.3.1--pyh7cba7a3_0) fails to even start bash inside
+    // the container ("/bin/bash: .../.command.run: /bin/bash: bad interpreter: Permission
+    // denied"), reproducibly at the same step across repeated runs, including after a
+    // full Docker image cache wipe. This looks like a Docker/ARM64-emulation issue with
+    // that specific image on this specific host, not a wiring problem - the samplesheet
+    // this chain generates (createMetapepSamplesheet) was separately verified correct
+    // (byte-checked against a real fixture), and fetchngs+mag both complete successfully
+    // before metapep's own first process hits this.
+    test("fetchngs -> mag -> metapep (assembly, epitope prediction)") {
+
+        when {
+            params {
+                enable_fetchngs = true
+                enable_mag      = true
+                enable_metapep  = true
+                general {
+                    wf_opts     = '-resume -ansi-log false'
+                }
+                fetchngs {
+                    input       = "$projectDir/tests/samplesheets/fetchngs_samplesheet.csv"
+                    wf_opts     = '-r 1.12.0 -profile docker'
+                }
+                mag {
+                    // --skip_binning: our single, small real test sample is too small/
+                    // simple for every binner mag ships (MaxBin2: "dataset cannot be
+                    // binned"; SemiBin2: needs contigs >=1500bp, we have 3) - the same
+                    // class of issue mag's own test profile already works around by
+                    // skipping CONCOCT/COMEBin/MetaBinner for its own bundled data.
+                    // funcscan/metapep both only consume mag's assembly output, not
+                    // its bins, so skipping binning entirely doesn't affect either chain.
+                    wf_opts     = '-r 5.5.0 -profile docker,test --skip_binning true'
+                }
+                metapep {
+                    wf_opts     = '-r 1.0.0 -profile docker,test'
+                }
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    // Missing chain: the metro map's "profiles" node conceptually includes ampliseq's
+    // (and taxprofiler's) output alongside magmap's, but only magmap -> differentialabundance
+    // is actually auto-wired (see createDifferentialabundanceMatrix) - ampliseq's own
+    // ASV/OTU table isn't reprojected into a --matrix. Enabling ampliseq (which runs
+    // fine standalone on its own test data) alongside differentialabundance with no
+    // explicit input for the latter should still fail schema validation, documenting
+    // that this edge doesn't exist yet rather than silently doing nothing.
+    test("missing chain: ampliseq -> differentialabundance is not auto-wired") {
+
+        when {
+            params {
+                enable_fetchngs               = false
+                enable_ampliseq               = true
+                enable_differentialabundance  = true
+                ampliseq {
+                    wf_opts                   = '-r 2.18.0 -profile docker,test'
+                }
+                // No differentialabundance.input/.params_file/.wf_opts, and its only
+                // auto-wired upstream is magmap, not ampliseq.
+            }
+        }
+
+        then {
+            assert !workflow.success
+        }
+
+    }
+
+}

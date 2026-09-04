@@ -1,0 +1,62 @@
+{
+    "Test Function createMetatdenovoSamplesheet - no dir": {
+        "content": null,
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-09-03T15:51:40.592234"
+    },
+    "Test Function createMagmapGenomeInfo - no dir": {
+        "content": null,
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-09-03T15:51:45.960043"
+    },
+    "Test Function readWithDefault - with file": {
+        "content": [
+            {
+                
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-09-03T15:51:33.525563"
+    },
+    "Test Function resolveFileFromDir": {
+        "content": [
+            {
+                
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-09-03T15:51:37.127215"
+    },
+    "Test Function readWithDefault - no file": {
+        "content": [
+            {
+                
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-09-03T15:51:35.289068"
+    },
+    "Test Function createMagSamplesheet - empty Dir": {
+        "content": null,
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2026-09-03T15:51:38.830797"
+    }
+}

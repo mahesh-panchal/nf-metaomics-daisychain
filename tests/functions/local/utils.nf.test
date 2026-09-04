@@ -1,0 +1,294 @@
+nextflow_function {
+
+    name "Test Functions"
+    script "functions/local/utils.nf"
+
+    test("Test Function readWithDefault - with file") {
+
+        function "readWithDefault"
+
+        when {
+            function {
+                """
+                input[0] = "$projectDir/configs/multiqc.config"
+                input[1] = Channel.value([])
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+
+    test("Test Function readWithDefault - no file") {
+
+        function "readWithDefault"
+
+        when {
+            function {
+                """
+                input[0] = ""
+                input[1] = Channel.fromPath("$projectDir/configs/multiqc.config")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+
+    test("Test Function resolveFileFromDir") {
+
+        function "resolveFileFromDir"
+
+        when {
+            function {
+                """
+                input[0] = 'multiqc.config'
+                input[1] = Channel.fromPath("$projectDir/configs")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+
+    // TODO: Update test with success
+    test("Test Function createMagSamplesheet - empty Dir") {
+
+        function "createMagSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = ''
+                """
+            }
+        }
+
+        then {
+            assert !function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+
+    // Same nf-test function-scope limitation as createMagSamplesheet above: calling
+    // a channel-returning function with a falsy literal outside a real workflow
+    // context errors in the harness itself, not in our function's logic (verified:
+    // the equivalent call inside an actual `workflow {}` block returns Channel.value([])
+    // correctly - see createMetatdenovoSamplesheet's `else` branch).
+    // TODO: Update test with success
+    test("Test Function createMetatdenovoSamplesheet - no dir") {
+
+        function "createMetatdenovoSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = ''
+                """
+            }
+        }
+
+        then {
+            assert !function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+
+    test("Test Function createMetatdenovoSamplesheet - reprojects fetchngs samplesheet") {
+
+        function "createMetatdenovoSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/fetchngs_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createAmpliseqSamplesheet - reprojects fetchngs samplesheet") {
+
+        function "createAmpliseqSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/fetchngs_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    // Same nf-test function-scope limitation noted above.
+    // TODO: Update test with success
+    test("Test Function createMagmapGenomeInfo - no dir") {
+
+        function "createMagmapGenomeInfo"
+
+        when {
+            function {
+                """
+                input[0] = ''
+                """
+            }
+        }
+
+        then {
+            assert !function.success
+            assert snapshot(function.result).match()
+        }
+
+    }
+
+    test("Test Function createMagmapGenomeInfo - builds genomeinfo from mag bins") {
+
+        function "createMagmapGenomeInfo"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/mag_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createDetaxizerSamplesheet - reprojects fetchngs samplesheet") {
+
+        function "createDetaxizerSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/fetchngs_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createEagerSamplesheet - reprojects fetchngs samplesheet") {
+
+        function "createEagerSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/fetchngs_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createMetatdenovoSamplesheetFromDetaxizer - builds from filtered reads") {
+
+        function "createMetatdenovoSamplesheetFromDetaxizer"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/detaxizer_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createEagerSamplesheetFromDetaxizer - builds from filtered reads") {
+
+        function "createEagerSamplesheetFromDetaxizer"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/detaxizer_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createMetapepSamplesheet - builds from mag contigs") {
+
+        function "createMetapepSamplesheet"
+
+        when {
+            function {
+                """
+                input[0] = Channel.fromPath("$projectDir/tests/data/mag_output_fixture")
+                """
+            }
+        }
+
+        then {
+            assert function.success
+        }
+
+    }
+
+    test("Test Function createDifferentialabundanceMatrix - no dir") {
+
+        function "createDifferentialabundanceMatrix"
+
+        when {
+            function {
+                """
+                input[0] = ''
+                """
+            }
+        }
+
+        then {
+            assert !function.success
+        }
+
+    }
+
+}

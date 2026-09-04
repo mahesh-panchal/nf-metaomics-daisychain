@@ -1,0 +1,55 @@
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "main.nf"
+
+    test("nf-metaomics-daisychain: fetchngs -> taxprofiler -profile docker,test") {
+
+        when {
+            params {
+                enable_fetchngs      = true
+                enable_taxprofiler   = true
+                general {
+                    wf_opts          = '-resume -ansi-log false'
+                }
+                fetchngs {
+                    input            = "$projectDir/tests/samplesheets/fetchngs_samplesheet.csv"
+                    wf_opts          = '-r 1.12.0 -profile docker --nf_core_pipeline taxprofiler'
+                }
+                taxprofiler {
+                    // -profile docker,test: real --input (from fetchngs) + taxprofiler's own tiny test --databases.
+                    // --run_kraken2/--run_bracken false: krakentools' combine_kreports.py crashes under
+                    // Docker's amd64-on-arm64 emulation (AttributeError: 'int' object has no attribute
+                    // 'children') when combining >1 kraken2-family report - unrelated to this repo's own
+                    // code, worked around by not running the kraken2/bracken classifiers in this test.
+                    wf_opts          = '-r 2.0.1 -profile docker,test --run_kraken2 false --run_bracken false'
+                    add_config       = "$projectDir/configs/multiqc-pin.config"
+                }
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("nf-metaomics-daisychain: schema rejects a pipeline enabled with no input source") {
+
+        when {
+            params {
+                enable_fetchngs      = false
+                enable_taxprofiler   = true
+                // No taxprofiler.input/.params_file, and its natural upstream
+                // (fetchngs) is disabled - nextflow_schema.json should reject this
+                // before any process runs.
+            }
+        }
+
+        then {
+            assert !workflow.success
+        }
+
+    }
+
+}
