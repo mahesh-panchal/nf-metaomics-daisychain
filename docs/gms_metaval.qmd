@@ -1,4 +1,0 @@
-# gms/metaval documentation
-
-
-Go to [https://github.com/genomic-medicine-sweden/metaval](https://github.com/genomic-medicine-sweden/metaval).

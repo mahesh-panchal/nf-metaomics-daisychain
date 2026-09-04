@@ -35,8 +35,6 @@ website:
         text: FuncScan
       - href: phyloplace.qmd
         text: PhyloPlace
-      - href: gms_metaval.qmd
-        text: GMS MetaVal
       - about.qmd
 
 format:
