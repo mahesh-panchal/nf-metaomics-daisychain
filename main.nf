@@ -1,160 +1,298 @@
-include { NEXTFLOW_RUN as NFCORE_FETCHNGS              } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_DETAXIZER             } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_CREATETAXDB           } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_AMPLISEQ              } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_TAXPROFILER           } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_EAGER                 } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_MAGMAP                } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_MAG                   } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_METATDENOVO           } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_DIFFERENTIALABUNDANCE } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_METAPEP               } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_PHAGEANNOTATOR        } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_FUNCSCAN              } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_PHYLOPLACE            } from "$projectDir/modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as GMS_METAVAL                  } from "$projectDir/modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_FETCHNGS              } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_DETAXIZER             } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_CREATETAXDB           } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_AMPLISEQ              } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_TAXPROFILER           } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_EAGER                 } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_MAGMAP                } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_MAG                   } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_METATDENOVO           } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_DIFFERENTIALABUNDANCE } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_METAPEP               } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_PHAGEANNOTATOR        } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_FUNCSCAN              } from "./modules/local/nextflow/run/main"
+include { NEXTFLOW_RUN as NFCORE_PHYLOPLACE            } from "./modules/local/nextflow/run/main"
+include { readWithDefault                              } from "./functions/local/utils"
+include { resolveFileFromDir as getSamplesheet         } from "./functions/local/utils"
+include { createMagSamplesheet                         } from "./functions/local/utils"
+include { createFuncscanSamplesheet                    } from "./functions/local/utils"
+include { createAmpliseqSamplesheet                    } from "./functions/local/utils"
+include { createMetatdenovoSamplesheet                 } from "./functions/local/utils"
+include { createMagmapGenomeInfo                       } from "./functions/local/utils"
+include { createDetaxizerSamplesheet                   } from "./functions/local/utils"
+include { createMetatdenovoSamplesheetFromDetaxizer    } from "./functions/local/utils"
+include { createEagerSamplesheet                       } from "./functions/local/utils"
+include { createEagerSamplesheetFromDetaxizer          } from "./functions/local/utils"
+include { createMetapepSamplesheet                     } from "./functions/local/utils"
+include { createDifferentialabundanceMatrix            } from "./functions/local/utils"
+include { validateParameters                           } from "plugin/nf-schema"
 
 workflow {
-    // TODO: Check params-file for values that override channel inputs
+    // Which pipelines to run is controlled by the enable_<pipeline> params (see
+    // nextflow.config). Whether a pipeline that's enabled but has no viable input
+    // source (neither an auto-wired upstream nor its own `.input`/`.params_file`) is
+    // caught here, before any process runs - see the `allOf` rules in
+    // nextflow_schema.json, not a hand-rolled check here.
+    validateParameters()
 
-    NFCORE_FETCHNGS ( // Args: pipeline name, workflow opts, params file, samplesheet, custom config
-        Channel.value('nf-core/fetchngs').filter{ params.fetchngs_enabled },
-        "${params.all_cli?: ''} ${params.fetchngs_cli?: ''}",
-        params.fetchngs_enabled && params.fetchngs_params ? file( params.fetchngs_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.fetchngs_enabled && params.fetchngs_config ? file(params.fetchngs_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/fetchngs').toUriString(),
-    )
+    // Channels used to connect stages together, so downstream stages can default to
+    // an upstream stage's output.
+    // - Vars later used as a channel input in their own right (`.map`'d, or passed as
+    //   a `readWithDefault` default) start as a real empty channel: `Channel.value([])`.
+    // - Vars only ever passed into a createXSamplesheet(dir)-style helper (which does
+    //   its own `if (dir) {...} else {...}` truthy check) start as a bare `[]` - a
+    //   plain falsy object, not a channel - matching what those helpers' own `else`
+    //   branch already returns.
+    // Neither ever needs `?: Channel.value([])` later: each is always already the
+    // right shape for how it's used downstream.
+    def fetchngs_output_samplesheet = Channel.value([])
+    def fetchngs_output              = []
+    def detaxizer_output             = []
+    def mag_output                   = []
+    def metatdenovo_output           = []
+    def magmap_output                = []
+    def createtaxdb_databases        = Channel.value([])
 
-    NFCORE_DETAXIZER (
-        Channel.value('nf-core/detaxizer').filter{ params.detaxizer_enabled },
-        "${params.all_cli?: ''} ${params.detaxizer_cli?: ''}",
-        params.detaxizer_enabled && params.detaxizer_params ? file( params.detaxizer_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.detaxizer_enabled && params.detaxizer_config ? file(params.detaxizer_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/detaxizer').toUriString(),
-    )
-
-    NFCORE_CREATETAXDB (
-        Channel.value('nf-core/createtaxdb').filter{ params.createtaxdb_enabled },
-        "${params.all_cli?: ''} ${params.createtaxdb_cli?: ''}",
-        params.createtaxdb_enabled && params.createtaxdb_params ? file( params.createtaxdb_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.createtaxdb_enabled && params.createtaxdb_config ? file(params.createtaxdb_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/createtaxdb').toUriString(),
-    )
-
-    NFCORE_AMPLISEQ (
-        Channel.value('nf-core/ampliseq').filter{ params.ampliseq_enabled },
-        "${params.all_cli?: ''} ${params.ampliseq_cli?: ''}",
-        params.ampliseq_enabled && params.ampliseq_params ? file( params.ampliseq_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.ampliseq_enabled && params.ampliseq_config ? file(params.ampliseq_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/ampliseq').toUriString(),
-    )
-
-    def taxprofiler_samplesheet = NFCORE_FETCHNGS.out.output
-        // Extract samplesheet from fetchngs output
-        .map { results -> results.resolve('samplesheet/samplesheet.csv') }
-        // If params file has input: override taxprofiler samplesheet
-        .filter { params.taxprofiler_enabled && params.taxprofiler_params ? file( params.taxprofiler_params, checkIfExists: true ).text.contains('input:') : true }
-        .ifEmpty([])
-    NFCORE_TAXPROFILER (
-        Channel.value('nf-core/taxprofiler').filter{ params.taxprofiler_enabled },
-        "${params.all_cli?: ''} ${params.taxprofiler_cli?: ''}",
-        params.taxprofiler_enabled && params.taxprofiler_params ? file( params.taxprofiler_params, checkIfExists: true ) : [],
-        taxprofiler_samplesheet,
-        params.taxprofiler_enabled && params.taxprofiler_config ? file(params.taxprofiler_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/taxprofiler').toUriString(),
-    )
-
-    NFCORE_EAGER (
-        Channel.value('nf-core/eager').filter{ params.eager_enabled },
-        "${params.all_cli?: ''} ${params.eager_cli?: ''}",
-        params.eager_enabled && params.eager_params ? file( params.eager_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.eager_enabled && params.eager_config ? file(params.eager_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/eager').toUriString(),
-    )
-
-    NFCORE_MAGMAP (
-        Channel.value('nf-core/magmap').filter{ params.magmap_enabled },
-        "${params.all_cli?: ''} ${params.magmap_cli?: ''}",
-        params.magmap_enabled && params.magmap_params ? file( params.magmap_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.magmap_enabled && params.magmap_config ? file(params.magmap_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/magmap').toUriString(),
-    )
-
-    NFCORE_MAG (
-        Channel.value('nf-core/mag').filter{ params.mag_enabled },
-        "${params.all_cli?: ''} ${params.mag_cli?: ''}",
-        params.mag_enabled && params.mag_params ? file( params.mag_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.mag_enabled && params.mag_config ? file(params.mag_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/mag').toUriString(),
-    )
-
-    NFCORE_METATDENOVO (
-        Channel.value('nf-core/metatdenovo').filter{ params.metatdenovo_enabled },
-        "${params.all_cli?: ''} ${params.metatdenovo_cli?: ''}",
-        params.metatdenovo_enabled && params.metatdenovo_params ? file( params.metatdenovo_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.metatdenovo_enabled && params.metatdenovo_config? file(params.metatdenovo_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/metatdenovo').toUriString(),
-    )
-
-    NFCORE_DIFFERENTIALABUNDANCE (
-        Channel.value('nf-core/differentialabundance').filter{ params.differentialabundance_enabled },
-        "${params.all_cli?: ''} ${params.differentialabundance_cli?: ''}",
-        params.differentialabundance_enabled && params.differentialabundance_params ? file( params.differentialabundance_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.differentialabundance_enabled && params.differentialabundance_config? file(params.differentialabundance_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/differentialabundance').toUriString(),
-    )
-
-    NFCORE_METAPEP (
-        Channel.value('nf-core/metapep').filter{ params.metapep_enabled },
-        "${params.all_cli?: ''} ${params.metapep_cli?: ''}",
-        params.metapep_enabled && params.metapep_params ? file( params.metapep_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.metapep_enabled && params.metapep_config ? file(params.metapep_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/metapep').toUriString(),
-    )
-
-    NFCORE_PHAGEANNOTATOR (
-        Channel.value('nf-core/phageannotator').filter{ params.phageannotator_enabled },
-        "${params.all_cli?: ''} ${params.phageannotator_cli?: ''}",
-        params.phageannotator_enabled && params.phageannotator_params ? file( params.phageannotator_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.phageannotator_enabled && params.phageannotator_config ? file(params.phageannotator_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/phageannotator').toUriString(),
-    )
-
-    NFCORE_FUNCSCAN (
-        Channel.value('nf-core/funcscan').filter{ params.funcscan_enabled },
-        "${params.all_cli?: ''} ${params.funcscan_cli?: ''}",
-        params.funcscan_enabled && params.funcscan_params ? file( params.funcscan_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.funcscan_enabled && params.funcscan_config ? file(params.funcscan_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/funcscan').toUriString(),
-    )
-
-    NFCORE_PHYLOPLACE (
-        Channel.value('nf-core/phyloplace').filter{ params.phyloplace_enabled },
-        "${params.all_cli?: ''} ${params.phyloplace_cli?: ''}",
-        params.phyloplace_enabled && params.phyloplace_params ? file( params.phyloplace_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.phyloplace_enabled && params.phyloplace_config ? file(params.phyloplace_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('nf-core/phyloplace').toUriString(),
-    )
-
-    GMS_METAVAL (
-        Channel.value('gms/metaval').filter{ params.gms_metaval_enabled },
-        "${params.all_cli?: ''} ${params.gms_metaval_cli?: ''}",
-        params.gms_metaval_enabled && params.gms_metaval_params ? file( params.gms_metaval_params, checkIfExists: true ) : [],
-        [], // Read from params-file
-        params.gms_metaval_enabled && params.gms_metaval_config ? file(params.gms_metaval_config, checkIfExists: true) : [],
-        workflow.workDir.resolve('gms/metaval').toUriString(),
-    )
+    // Run pipelines
+    if (params.enable_fetchngs) {
+        NFCORE_FETCHNGS (
+            'nf-core/fetchngs',
+            "${params.general.wf_opts ?: ''} ${params.fetchngs.wf_opts ?: ''}",     // workflow opts
+            readWithDefault( params.fetchngs.params_file, Channel.value([]) ),      // params file
+            readWithDefault( params.fetchngs.input, Channel.value([]) ),            // samplesheet
+            readWithDefault( params.fetchngs.add_config, Channel.value([]) ),       // custom config
+            workflow.workDir.resolve('nf-core/fetchngs').toUriString(),
+        )
+        fetchngs_output_samplesheet = getSamplesheet( 'samplesheet/samplesheet.csv', NFCORE_FETCHNGS.out.output )
+        fetchngs_output             = NFCORE_FETCHNGS.out.output
+    }
+    if (params.enable_detaxizer) {
+        // FETCHNGS -> DETAXIZER. Amplicon reads bypass detaxizer entirely per the
+        // metro map (only the shotgun branch needs decontamination), so this only
+        // ever defaults from fetchngs, never feeds ampliseq.
+        // Always ask detaxizer to generate its own downstream_samplesheets/{taxprofiler,
+        // mag-se,mag-pe}.csv (same "best effort" pattern as createtaxdb) - an explicit
+        // override in detaxizer.wf_opts always wins, same precedence as elsewhere.
+        NFCORE_DETAXIZER (
+            'nf-core/detaxizer',
+            "${params.general.wf_opts ?: ''} --generate_downstream_samplesheets true --generate_pipeline_samplesheets taxprofiler,mag ${params.detaxizer.wf_opts ?: ''}",
+            readWithDefault( params.detaxizer.params_file, Channel.value([]) ),
+            readWithDefault( params.detaxizer.input, createDetaxizerSamplesheet(fetchngs_output) ),
+            readWithDefault( params.detaxizer.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/detaxizer').toUriString(),
+        )
+        detaxizer_output = NFCORE_DETAXIZER.out.output
+    }
+    if (params.enable_createtaxdb) {
+        NFCORE_CREATETAXDB (
+            'nf-core/createtaxdb',
+            "${params.general.wf_opts ?: ''} ${params.createtaxdb.wf_opts ?: ''}",
+            readWithDefault( params.createtaxdb.params_file, Channel.value([]) ),
+            readWithDefault( params.createtaxdb.input, Channel.value([]) ),
+            readWithDefault( params.createtaxdb.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/createtaxdb').toUriString(),
+        )
+        // createtaxdb's own docs call this CSV "best effort" - may need manual
+        // completion. An explicit --databases in taxprofiler.wf_opts always wins,
+        // since it's appended after this and repeated pipeline params let the last
+        // value win (verified: unlike -profile, which errors on repetition).
+        createtaxdb_databases = getSamplesheet( 'downstream_samplesheets/taxprofiler.csv', NFCORE_CREATETAXDB.out.output )
+    }
+    if (params.enable_ampliseq) {
+        // FETCHNGS -> AMPLISEQ (createAmpliseqSamplesheet reprojects fetchngs' default
+        // samplesheet - fetchngs' --nf_core_pipeline auto-formatting doesn't cover ampliseq).
+        NFCORE_AMPLISEQ (
+            'nf-core/ampliseq',
+            "${params.general.wf_opts ?: ''} ${params.ampliseq.wf_opts ?: ''}",
+            readWithDefault( params.ampliseq.params_file, Channel.value([]) ),
+            readWithDefault( params.ampliseq.input, createAmpliseqSamplesheet(fetchngs_output) ),
+            readWithDefault( params.ampliseq.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/ampliseq').toUriString(),
+        )
+    }
+    if (params.enable_taxprofiler) {
+        // FETCHNGS -> TAXPROFILER: fetchngs.wf_opts should include
+        // `--nf_core_pipeline taxprofiler` so its samplesheet is pre-formatted.
+        // DETAXIZER -> TAXPROFILER takes priority when detaxizer ran: its own
+        // natively-generated downstream_samplesheets/taxprofiler.csv (decontaminated
+        // reads, real metadata carried through from detaxizer's own input).
+        // CREATETAXDB -> TAXPROFILER --databases, see comment above.
+        def taxprofiler_default_input = fetchngs_output_samplesheet
+        if (detaxizer_output) {
+            taxprofiler_default_input = getSamplesheet( 'downstream_samplesheets/taxprofiler.csv', detaxizer_output )
+        }
+        def taxprofiler_databases_flag = createtaxdb_databases.map { db -> db ? "--databases ${db}" : '' }
+        NFCORE_TAXPROFILER (
+            'nf-core/taxprofiler',
+            taxprofiler_databases_flag.map { flag -> "${params.general.wf_opts ?: ''} ${flag} ${params.taxprofiler.wf_opts ?: ''}" },
+            readWithDefault( params.taxprofiler.params_file, Channel.value([]) ),
+            readWithDefault( params.taxprofiler.input, taxprofiler_default_input ),
+            readWithDefault( params.taxprofiler.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/taxprofiler').toUriString(),
+        )
+    }
+    if (params.enable_eager) {
+        // FETCHNGS/DETAXIZER -> EAGER, per the metro map (same shared fastq node as
+        // mag/metatdenovo). eager's own OUTPUT is an endpoint though - see plan Phase 3:
+        // BAM/VCF/consensus are QC/authentication products, not assembly inputs, so
+        // nothing downstream defaults from it.
+        def eager_default_input = createEagerSamplesheet(fetchngs_output)
+        if (detaxizer_output) {
+            eager_default_input = createEagerSamplesheetFromDetaxizer(detaxizer_output)
+        }
+        NFCORE_EAGER (
+            'nf-core/eager',
+            "${params.general.wf_opts ?: ''} ${params.eager.wf_opts ?: ''}",
+            readWithDefault( params.eager.params_file, Channel.value([]) ),
+            readWithDefault( params.eager.input, eager_default_input ),
+            readWithDefault( params.eager.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/eager').toUriString(),
+        )
+    }
+    if (params.enable_mag) {
+        // FETCHNGS -> MAG. DETAXIZER -> MAG takes priority when detaxizer ran: its own
+        // natively-generated downstream_samplesheets/mag-se.csv. Only the single-end
+        // sheet is used here - detaxizer writes mag-pe.csv separately for paired-end
+        // samples, which would need combining in by hand via mag.input if you have both.
+        def mag_default_input = createMagSamplesheet(fetchngs_output)
+        if (detaxizer_output) {
+            mag_default_input = getSamplesheet( 'downstream_samplesheets/mag-se.csv', detaxizer_output )
+        }
+        // Both of the above are always single-end (verified: mag 5.5.0 errors "Single-end
+        // data must be executed with --single_end" otherwise) - only add the flag when
+        // we're actually the ones supplying the samplesheet, not when mag.input overrides
+        // it with the user's own (possibly paired-end) data.
+        def mag_single_end_flag = (!params.mag.input && (fetchngs_output || detaxizer_output)) ? '--single_end' : ''
+        NFCORE_MAG (
+            'nf-core/mag',
+            "${params.general.wf_opts ?: ''} ${mag_single_end_flag} ${params.mag.wf_opts ?: ''}",
+            readWithDefault( params.mag.params_file, Channel.value([]) ),
+            readWithDefault( params.mag.input, mag_default_input ),
+            readWithDefault( params.mag.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/mag').toUriString(),
+        )
+        mag_output = NFCORE_MAG.out.output
+    }
+    if (params.enable_magmap) {
+        // MAG -> MAGMAP --genomeinfo (from MetaBAT2 bins; genome_gff left blank -
+        // magmap auto-annotates). Its own reads samplesheet is still user-supplied:
+        // magmap needs its own --input reads alongside --genomeinfo, and there isn't
+        // yet a single obvious upstream reads source to default it to here - enforced
+        // in nextflow_schema.json (magmap always needs its own input/params_file).
+        def magmap_genomeinfo_flag = createMagmapGenomeInfo(mag_output)
+            .map { db -> db ? "--genomeinfo ${db}" : '' }
+        NFCORE_MAGMAP (
+            'nf-core/magmap',
+            magmap_genomeinfo_flag.map { flag -> "${params.general.wf_opts ?: ''} ${flag} ${params.magmap.wf_opts ?: ''}" },
+            readWithDefault( params.magmap.params_file, Channel.value([]) ),
+            readWithDefault( params.magmap.input, Channel.value([]) ),
+            readWithDefault( params.magmap.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/magmap').toUriString(),
+        )
+        magmap_output = NFCORE_MAGMAP.out.output
+    }
+    if (params.enable_metatdenovo) {
+        // FETCHNGS/DETAXIZER -> METATDENOVO (reprojects the upstream samplesheet to
+        // metatdenovo's sample,fastq_1,fastq_2 schema; detaxizer has no native
+        // downstream-samplesheet support for metatdenovo, so a separate glob-based
+        // glue is used for that source). metatdenovo produces one combined co-assembly
+        // rather than per-sample contigs, so unlike mag it isn't wired as a funcscan
+        // input source here - see createFuncscanSamplesheet's glob parameter if you
+        // want to wire that manually.
+        def metatdenovo_default_input = createMetatdenovoSamplesheet(fetchngs_output)
+        if (detaxizer_output) {
+            metatdenovo_default_input = createMetatdenovoSamplesheetFromDetaxizer(detaxizer_output)
+        }
+        NFCORE_METATDENOVO (
+            'nf-core/metatdenovo',
+            "${params.general.wf_opts ?: ''} ${params.metatdenovo.wf_opts ?: ''}",
+            readWithDefault( params.metatdenovo.params_file, Channel.value([]) ),
+            readWithDefault( params.metatdenovo.input, metatdenovo_default_input ),
+            readWithDefault( params.metatdenovo.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/metatdenovo').toUriString(),
+        )
+        metatdenovo_output = NFCORE_METATDENOVO.out.output
+    }
+    if (params.enable_differentialabundance) {
+        // MAGMAP -> DIFFERENTIALABUNDANCE --matrix (magmap's own docs call its counts
+        // table "ready for further analysis... by other pipelines such as nf-core/
+        // differentialabundance" - a real matrix, not a placeholder). The sample sheet
+        // (--input, conditions/batch) and --contrasts are always user-supplied: no
+        // upstream stage carries study-design metadata to derive them from.
+        def differentialabundance_matrix_flag = createDifferentialabundanceMatrix(magmap_output)
+            .map { m -> m ? "--matrix ${m}" : '' }
+        NFCORE_DIFFERENTIALABUNDANCE (
+            'nf-core/differentialabundance',
+            differentialabundance_matrix_flag.map { flag -> "${params.general.wf_opts ?: ''} ${flag} ${params.differentialabundance.wf_opts ?: ''}" },
+            readWithDefault( params.differentialabundance.params_file, Channel.value([]) ),
+            readWithDefault( params.differentialabundance.input, Channel.value([]) ),
+            readWithDefault( params.differentialabundance.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/differentialabundance').toUriString(),
+        )
+    }
+    if (params.enable_metapep) {
+        // MAG -> METAPEP (type=assembly, one condition per sample). alleles defaults to
+        // a real HLA-I example pair from nf-core/metapep's own test data, not real
+        // subject typing - see createMetapepSamplesheet. Always review before trusting
+        // epitope predictions.
+        NFCORE_METAPEP (
+            'nf-core/metapep',
+            "${params.general.wf_opts ?: ''} ${params.metapep.wf_opts ?: ''}",
+            readWithDefault( params.metapep.params_file, Channel.value([]) ),
+            readWithDefault( params.metapep.input, createMetapepSamplesheet(mag_output) ),
+            readWithDefault( params.metapep.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/metapep').toUriString(),
+        )
+    }
+    if (params.enable_phageannotator) {
+        // Deferred - see plan Phase 3: no stable nf-core release yet, and it takes raw
+        // reads (sample,fastq_1,fastq_2), so it would run parallel to mag/metatdenovo,
+        // not downstream of them. Runs standalone until wiring is revisited.
+        NFCORE_PHAGEANNOTATOR (
+            'nf-core/phageannotator',
+            "${params.general.wf_opts ?: ''} ${params.phageannotator.wf_opts ?: ''}",
+            readWithDefault( params.phageannotator.params_file, Channel.value([]) ),
+            readWithDefault( params.phageannotator.input, Channel.value([]) ),
+            readWithDefault( params.phageannotator.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/phageannotator').toUriString(),
+        )
+    }
+    if (params.enable_funcscan) {
+        // MAG -> FUNCSCAN (MEGAHIT contigs), falling back to METATDENOVO's single
+        // co-assembly when mag didn't run - both feed the same "fasta" node per the
+        // metro map. Only one row results from metatdenovo (one combined assembly,
+        // not per-sample contigs).
+        def funcscan_default_input = createFuncscanSamplesheet(mag_output)
+        if (!mag_output && metatdenovo_output) {
+            funcscan_default_input = createFuncscanSamplesheet(metatdenovo_output, 'megahit/megahit_out/*.fa.gz')
+        }
+        NFCORE_FUNCSCAN (
+            'nf-core/funcscan',
+            "${params.general.wf_opts ?: ''} ${params.funcscan.wf_opts ?: ''}",
+            readWithDefault( params.funcscan.params_file, Channel.value([]) ),
+            readWithDefault( params.funcscan.input, funcscan_default_input ),
+            readWithDefault( params.funcscan.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/funcscan').toUriString(),
+        )
+    }
+    if (params.enable_phyloplace) {
+        // NOTE: nf-core/phyloplace's real samplesheet flag is --phyloplace_input, not
+        // --input (verified against its nextflow_schema.json) - unlike every other
+        // pipeline wired here. `phyloplace.input`/readWithDefault below is therefore
+        // always [] in practice: NEXTFLOW_RUN only ever emits `--input`, which
+        // phyloplace doesn't recognise. Use `phyloplace.params_file` (with its own
+        // `phyloplace_input:`/`phylosearch_input:` key) instead - the only viable path
+        // today. Not otherwise auto-wireable regardless: sample,queryseqfile,
+        // refseqfile,refphylogeny,model is one CSV where refseqfile/refphylogeny/model
+        // are per-row required and always user-supplied, so a partial row (queryseqfile
+        // only, from mag/funcscan marker genes) still wouldn't validate on its own.
+        NFCORE_PHYLOPLACE (
+            'nf-core/phyloplace',
+            "${params.general.wf_opts ?: ''} ${params.phyloplace.wf_opts ?: ''}",
+            readWithDefault( params.phyloplace.params_file, Channel.value([]) ),
+            readWithDefault( params.phyloplace.input, Channel.value([]) ),
+            readWithDefault( params.phyloplace.add_config, Channel.value([]) ),
+            workflow.workDir.resolve('nf-core/phyloplace').toUriString(),
+        )
+    }
 }

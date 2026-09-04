@@ -1,0 +1,1387 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/mahesh-panchal/nf-metaomics-daisychain/main/nextflow_schema.json",
+    "title": "nf-metaomics-daisychain pipeline parameters",
+    "description": "A Nextflow meta-pipeline that daisy-chains nf-core pipelines for meta-omic data.",
+    "type": "object",
+    "properties": {
+        "outdir": {
+            "type": "string",
+            "default": "results",
+            "description": "Base output directory."
+        },
+        "general": {
+            "type": "object",
+            "properties": {
+                "wf_opts": {
+                    "type": "string",
+                    "default": "-resume -ansi-log false"
+                }
+            }
+        },
+        "enable_fetchngs": {
+            "type": "boolean",
+            "default": true,
+            "description": "Run fetchngs as part of the chain."
+        },
+        "enable_detaxizer": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run detaxizer as part of the chain."
+        },
+        "enable_createtaxdb": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run createtaxdb as part of the chain."
+        },
+        "enable_ampliseq": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run ampliseq as part of the chain."
+        },
+        "enable_taxprofiler": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run taxprofiler as part of the chain."
+        },
+        "enable_eager": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run eager as part of the chain."
+        },
+        "enable_magmap": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run magmap as part of the chain."
+        },
+        "enable_mag": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run mag as part of the chain."
+        },
+        "enable_metatdenovo": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run metatdenovo as part of the chain."
+        },
+        "enable_differentialabundance": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run differentialabundance as part of the chain."
+        },
+        "enable_metapep": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run metapep as part of the chain."
+        },
+        "enable_phageannotator": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run phageannotator as part of the chain."
+        },
+        "enable_funcscan": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run funcscan as part of the chain."
+        },
+        "enable_phyloplace": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run phyloplace as part of the chain."
+        },
+        "fetchngs": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for fetchngs (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for fetchngs (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for fetchngs."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for fetchngs (-c)."
+                }
+            }
+        },
+        "detaxizer": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for detaxizer (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for detaxizer (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for detaxizer."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for detaxizer (-c)."
+                }
+            }
+        },
+        "createtaxdb": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for createtaxdb (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for createtaxdb (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for createtaxdb."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for createtaxdb (-c)."
+                }
+            }
+        },
+        "ampliseq": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for ampliseq (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for ampliseq (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for ampliseq."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for ampliseq (-c)."
+                }
+            }
+        },
+        "taxprofiler": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for taxprofiler (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for taxprofiler (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for taxprofiler."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for taxprofiler (-c)."
+                }
+            }
+        },
+        "eager": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for eager (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for eager (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for eager."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for eager (-c)."
+                }
+            }
+        },
+        "magmap": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for magmap (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for magmap (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for magmap."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for magmap (-c)."
+                }
+            }
+        },
+        "mag": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for mag (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for mag (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for mag."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for mag (-c)."
+                }
+            }
+        },
+        "metatdenovo": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for metatdenovo (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for metatdenovo (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for metatdenovo."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for metatdenovo (-c)."
+                }
+            }
+        },
+        "differentialabundance": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for differentialabundance (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for differentialabundance (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for differentialabundance."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for differentialabundance (-c)."
+                }
+            }
+        },
+        "metapep": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for metapep (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for metapep (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for metapep."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for metapep (-c)."
+                }
+            }
+        },
+        "phageannotator": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for phageannotator (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for phageannotator (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for phageannotator."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for phageannotator (-c)."
+                }
+            }
+        },
+        "funcscan": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for funcscan (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for funcscan (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for funcscan."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for funcscan (-c)."
+                }
+            }
+        },
+        "phyloplace": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Samplesheet override for phyloplace (--input)."
+                },
+                "params_file": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Params file for phyloplace (-params-file)."
+                },
+                "wf_opts": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Extra nextflow/pipeline CLI options for phyloplace."
+                },
+                "add_config": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Additional config file for phyloplace (-c)."
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "if": {
+                "required": [
+                    "enable_fetchngs"
+                ],
+                "properties": {
+                    "enable_fetchngs": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "fetchngs": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "fetchngs": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "fetchngs": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_detaxizer"
+                ],
+                "properties": {
+                    "enable_detaxizer": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "detaxizer": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "detaxizer": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "detaxizer": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_createtaxdb"
+                ],
+                "properties": {
+                    "enable_createtaxdb": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "createtaxdb": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "createtaxdb": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "createtaxdb": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_ampliseq"
+                ],
+                "properties": {
+                    "enable_ampliseq": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "ampliseq": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "ampliseq": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "ampliseq": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_taxprofiler"
+                ],
+                "properties": {
+                    "enable_taxprofiler": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_detaxizer"
+                        ],
+                        "properties": {
+                            "enable_detaxizer": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "taxprofiler": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "taxprofiler": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "taxprofiler": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_eager"
+                ],
+                "properties": {
+                    "enable_eager": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_detaxizer"
+                        ],
+                        "properties": {
+                            "enable_detaxizer": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "eager": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "eager": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "eager": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_magmap"
+                ],
+                "properties": {
+                    "enable_magmap": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "magmap": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "magmap": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "magmap": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_mag"
+                ],
+                "properties": {
+                    "enable_mag": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_detaxizer"
+                        ],
+                        "properties": {
+                            "enable_detaxizer": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "mag": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "mag": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "mag": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_metatdenovo"
+                ],
+                "properties": {
+                    "enable_metatdenovo": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_fetchngs"
+                        ],
+                        "properties": {
+                            "enable_fetchngs": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_detaxizer"
+                        ],
+                        "properties": {
+                            "enable_detaxizer": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "metatdenovo": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "metatdenovo": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "metatdenovo": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_differentialabundance"
+                ],
+                "properties": {
+                    "enable_differentialabundance": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "differentialabundance": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "differentialabundance": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "differentialabundance": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_metapep"
+                ],
+                "properties": {
+                    "enable_metapep": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_mag"
+                        ],
+                        "properties": {
+                            "enable_mag": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "metapep": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "metapep": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "metapep": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_phageannotator"
+                ],
+                "properties": {
+                    "enable_phageannotator": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "phageannotator": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "phageannotator": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "phageannotator": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_funcscan"
+                ],
+                "properties": {
+                    "enable_funcscan": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "required": [
+                            "enable_mag"
+                        ],
+                        "properties": {
+                            "enable_mag": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "required": [
+                            "enable_metatdenovo"
+                        ],
+                        "properties": {
+                            "enable_metatdenovo": {
+                                "const": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "funcscan": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "funcscan": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "funcscan": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "if": {
+                "required": [
+                    "enable_phyloplace"
+                ],
+                "properties": {
+                    "enable_phyloplace": {
+                        "const": true
+                    }
+                }
+            },
+            "then": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "phyloplace": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "phyloplace": {
+                                "required": [
+                                    "params_file"
+                                ],
+                                "properties": {
+                                    "params_file": {
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "phyloplace": {
+                                "required": [
+                                    "wf_opts"
+                                ],
+                                "properties": {
+                                    "wf_opts": {
+                                        "pattern": "(^|[ ,])test($|[ ,])"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
