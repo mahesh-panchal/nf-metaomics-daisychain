@@ -20,8 +20,27 @@ nextflow_process {
         }
 
         then {
-            assert process.success
-            assert snapshot(process.out).match()
+            // Only snapshot content that's actually deterministic given fixed input:
+            // FastQC/cowpy/trimmed-reads outputs. MultiQC's own report/data and
+            // nf-core/demo's pipeline_info reports embed the run's wall-clock
+            // timestamp and absolute work-dir paths in their content (and, for
+            // pipeline_info, in their filenames too) - confirmed non-deterministic by
+            // running this test twice and diffing the snapshot. Matches nf-core's own
+            // MULTIQC module test convention (asserts report/data *exist* at the
+            // expected path, snapshots only the deterministic `versions` output,
+            // never the report/data content itself).
+            def results = process.out.output[0]
+            assertAll(
+                { assert process.success },
+                { assert snapshot(
+                    file("${results}/cowpy"),
+                    file("${results}/fastqc"),
+                    file("${results}/fq"),
+                ).match() },
+                { assert file("${results}/multiqc/multiqc_report.html").exists() },
+                { assert file("${results}/multiqc/multiqc_data").exists() },
+                { assert file("${results}/pipeline_info/nf_core_demo_software_mqc_versions.yml").exists() },
+            )
         }
 
     }
