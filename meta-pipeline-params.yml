@@ -12,7 +12,6 @@ enable_taxprofiler: true
 # enable_metatdenovo: true
 # enable_differentialabundance: true
 # enable_metapep: true
-# enable_phageannotator: true
 # enable_funcscan: true
 # enable_phyloplace: true
 # enable_hlatyping: true
@@ -42,8 +41,6 @@ taxprofiler:
 #   params_file: 'tests/data/differentialabundance_params.yml'
 # metapep:
 #   params_file: 'tests/data/metapep_params.yml'
-# phageannotator:
-#   params_file: 'tests/data/phageannotator_params.yml'
 # funcscan:
 #   params_file: 'tests/data/funcscan_params.yml'
 # phyloplace:

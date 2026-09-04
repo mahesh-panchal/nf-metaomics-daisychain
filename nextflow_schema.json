@@ -74,11 +74,6 @@
             "default": false,
             "description": "Run metapep as part of the chain."
         },
-        "enable_phageannotator": {
-            "type": "boolean",
-            "default": false,
-            "description": "Run phageannotator as part of the chain."
-        },
         "enable_funcscan": {
             "type": "boolean",
             "default": false,
@@ -376,31 +371,6 @@
                     "type": "string",
                     "default": "",
                     "description": "Additional config file for metapep (-c)."
-                }
-            }
-        },
-        "phageannotator": {
-            "type": "object",
-            "properties": {
-                "input": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Samplesheet override for phageannotator (--input)."
-                },
-                "params_file": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Params file for phageannotator (-params-file)."
-                },
-                "wf_opts": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Extra nextflow/pipeline CLI options for phageannotator."
-                },
-                "add_config": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Additional config file for phageannotator (-c)."
                 }
             }
         },
@@ -1265,64 +1235,6 @@
                     {
                         "properties": {
                             "metapep": {
-                                "required": [
-                                    "wf_opts"
-                                ],
-                                "properties": {
-                                    "wf_opts": {
-                                        "pattern": "(^|[ ,])test($|[ ,])"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "if": {
-                "required": [
-                    "enable_phageannotator"
-                ],
-                "properties": {
-                    "enable_phageannotator": {
-                        "const": true
-                    }
-                }
-            },
-            "then": {
-                "anyOf": [
-                    {
-                        "properties": {
-                            "phageannotator": {
-                                "required": [
-                                    "input"
-                                ],
-                                "properties": {
-                                    "input": {
-                                        "minLength": 1
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "phageannotator": {
-                                "required": [
-                                    "params_file"
-                                ],
-                                "properties": {
-                                    "params_file": {
-                                        "minLength": 1
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "phageannotator": {
                                 "required": [
                                     "wf_opts"
                                 ],

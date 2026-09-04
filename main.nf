@@ -9,7 +9,6 @@ include { NEXTFLOW_RUN as NFCORE_MAG                   } from "./modules/local/n
 include { NEXTFLOW_RUN as NFCORE_METATDENOVO           } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_DIFFERENTIALABUNDANCE } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_METAPEP               } from "./modules/local/nextflow/run/main"
-include { NEXTFLOW_RUN as NFCORE_PHAGEANNOTATOR        } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_FUNCSCAN              } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_PHYLOPLACE            } from "./modules/local/nextflow/run/main"
 include { NEXTFLOW_RUN as NFCORE_HLATYPING             } from "./modules/local/nextflow/run/main"
@@ -288,19 +287,6 @@ workflow {
             readWithDefault( params.metapep.input, createMetapepSamplesheet(mag_output, hlatyping_output) ),
             readWithDefault( params.metapep.add_config, Channel.value([]) ),
             workflow.workDir.resolve('nf-core/metapep').toUriString(),
-        )
-    }
-    if (params.enable_phageannotator) {
-        // Deferred - see plan Phase 3: no stable nf-core release yet, and it takes raw
-        // reads (sample,fastq_1,fastq_2), so it would run parallel to mag/metatdenovo,
-        // not downstream of them. Runs standalone until wiring is revisited.
-        NFCORE_PHAGEANNOTATOR (
-            'nf-core/phageannotator',
-            "${params.general.wf_opts ?: ''} ${params.phageannotator.wf_opts ?: ''}",
-            readWithDefault( params.phageannotator.params_file, Channel.value([]) ),
-            readWithDefault( params.phageannotator.input, Channel.value([]) ),
-            readWithDefault( params.phageannotator.add_config, Channel.value([]) ),
-            workflow.workDir.resolve('nf-core/phageannotator').toUriString(),
         )
     }
     if (params.enable_funcscan) {

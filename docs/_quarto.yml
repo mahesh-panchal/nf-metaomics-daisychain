@@ -33,8 +33,6 @@ website:
         text: DifferentialAbundance
       - href: metapep.qmd
         text: MetaPep
-      - href: phageannotator.qmd
-        text: PhageAnnotator
       - href: funcscan.qmd
         text: FuncScan
       - href: proteinfamilies.qmd
