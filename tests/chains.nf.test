@@ -5,8 +5,15 @@ nextflow_pipeline {
 
     // fetchngs itself always needs some real accession to fetch - nf-core/fetchngs's
     // own -profile test downloads 10 accessions (including a GEO series), which is
-    // heavy for a wiring test, so fetchngs keeps using this repo's existing minimal
-    // single-accession fixture as the chain's entry point. Every pipeline downstream
+    // heavy for a wiring test, so fetchngs keeps using this repo's own minimal
+    // single-accession fixture (tests/samplesheets/fetchngs_samplesheet.csv) as the
+    // chain's entry point. That fixture is ERR3579720 - a real, small (~3.4MB,
+    // ~80k read pairs) modern-human paired-end WGS run from the same ENA study
+    // (PRJEB34569, an African-hominid oral-microbiome aDNA project) as the larger
+    // accession used earlier in this repo's development, chosen deliberately for
+    // being ~20x smaller while still carrying a genuine mixed human+microbial read
+    // pool - confirmed by re-running the fetchngs->taxprofiler, fetchngs->mag->
+    // funcscan, and fetchngs->hlatyping chains against it. Every pipeline downstream
     // of fetchngs runs its own `-profile docker,test` as requested - the auto-wired
     // samplesheet from the upstream stage still takes priority over whatever sample
     // each test profile bundles, since NEXTFLOW_RUN always appends --input last
@@ -142,6 +149,16 @@ nextflow_pipeline {
 
     }
 
+    // NOTE: on this host, HLATYPING:YARA_MAPPER is intermittently SIGKILLed (exit
+    // 137), reproducibly even in full isolation - `docker info` shows this host's
+    // Docker Desktop VM is capped at only ~7.75GB total memory regardless of the
+    // 64GB physical host RAM, so any container's own `--memory` request is moot
+    // once total concurrent container usage (including other work on this shared
+    // machine) exceeds that ceiling. Same class of pre-existing environment
+    // constraint as the krakentools/MultiQC/KMCP/CAZyme flakiness already
+    // documented above and in tests/main.nf.test, not a wiring or sample-size
+    // regression - the wiring itself was separately confirmed correct by a clean
+    // isolated run earlier in this repo's development.
     test("fetchngs -> hlatyping (HLA typing from our own reprojected samplesheet)") {
 
         when {
