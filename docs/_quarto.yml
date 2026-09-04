@@ -19,6 +19,10 @@ website:
         text: TaxProfiler
       - href: eager.qmd
         text: EAGER
+      - href: hlatyping.qmd
+        text: HLATyping
+      - href: coproid.qmd
+        text: CoproID
       - href: magmap.qmd
         text: MAGMAp
       - href: mag.qmd
@@ -33,6 +37,8 @@ website:
         text: PhageAnnotator
       - href: funcscan.qmd
         text: FuncScan
+      - href: proteinfamilies.qmd
+        text: ProteinFamilies
       - href: phyloplace.qmd
         text: PhyloPlace
       - about.qmd

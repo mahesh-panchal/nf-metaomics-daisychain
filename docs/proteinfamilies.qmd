@@ -1,0 +1,5 @@
+# nf-core/proteinfamilies documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/proteinfamilies" title="nf-core proteinfamilies documentation"></iframe>
+```

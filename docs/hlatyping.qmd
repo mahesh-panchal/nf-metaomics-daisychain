@@ -1,0 +1,5 @@
+# nf-core/hlatyping documentation
+
+```{=html}
+<iframe width="100%" height="1000" src="https://nf-co.re/hlatyping" title="nf-core hlatyping documentation"></iframe>
+```

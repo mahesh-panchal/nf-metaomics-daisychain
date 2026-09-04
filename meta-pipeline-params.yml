@@ -15,6 +15,9 @@ enable_taxprofiler: true
 # enable_phageannotator: true
 # enable_funcscan: true
 # enable_phyloplace: true
+# enable_hlatyping: true
+# enable_coproid: true
+# enable_proteinfamilies: true
 
 fetchngs:
   params_file: 'tests/params/fetchngs-params.json'
@@ -45,3 +48,9 @@ taxprofiler:
 #   params_file: 'tests/data/funcscan_params.yml'
 # phyloplace:
 #   params_file: 'tests/data/phyloplace_params.yml'
+# hlatyping:
+#   params_file: 'tests/data/hlatyping_params.yml'
+# coproid:
+#   params_file: 'tests/data/coproid_params.yml'
+# proteinfamilies:
+#   params_file: 'tests/data/proteinfamilies_params.yml'
